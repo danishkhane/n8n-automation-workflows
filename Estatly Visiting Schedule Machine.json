@@ -1,0 +1,364 @@
+{
+  "name": "Estatly Visiting Schedule Machine",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Estatly",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "73e02758-6544-4d72-b1ad-11005544cf2b",
+      "name": "Webhook",
+      "webhookId": "807f82b2-a7c4-4b34-ac14-fbdeba86c2fd"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "113gYvxK6gPSl5gm2xosLHeHYXcbDof1ZhmeMS6GnuoM",
+          "mode": "list",
+          "cachedResultName": "Estatly_Property_Visits (1)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/113gYvxK6gPSl5gm2xosLHeHYXcbDof1ZhmeMS6GnuoM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2109345154,
+          "mode": "list",
+          "cachedResultName": "Property Visits",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/113gYvxK6gPSl5gm2xosLHeHYXcbDof1ZhmeMS6GnuoM/edit#gid=2109345154"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Property_ID": "={{ $json.body.property_id }}",
+            "Property_Title": "={{ $json.body.property_title }}",
+            "Property_Type": "={{ $json.body.property_type }}",
+            "Property_Image": "={{ $json.body.property_image }}",
+            "Visitor_Email": "={{ $json.body.visitor_email }}",
+            "Visitor_Name": "={{ $json.body.visitor_name }}",
+            "Visitor_Phone": "={{ $json.body.visitor_phone }}",
+            "Preferred_Date": "={{ $json.body.preferred_date }}",
+            "Preferred_Time": "={{ $json.body.preferred_time }}",
+            "Payment_Method": "={{ $json.body.payment_method }}",
+            "Visit_Fee": "={{ $json.body.visit_fee }}",
+            "Visitor_Message": "={{ $json.body.message }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Property_ID",
+              "displayName": "Property_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Property_Title",
+              "displayName": "Property_Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Property_Type",
+              "displayName": "Property_Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Property_Image",
+              "displayName": "Property_Image",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Visitor_Name",
+              "displayName": "Visitor_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Visitor_Email",
+              "displayName": "Visitor_Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Visitor_Phone",
+              "displayName": "Visitor_Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Preferred_Date",
+              "displayName": "Preferred_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Preferred_Time",
+              "displayName": "Preferred_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Payment_Method",
+              "displayName": "Payment_Method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Visit_Fee",
+              "displayName": "Visit_Fee",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Visitor_Message",
+              "displayName": "Visitor_Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "0c469dbe-58bc-4fe2-b1ec-c4a3cab00005",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Process the following property visit request.\n\nPROPERTY INFORMATION\n\nProperty ID:\n{{ $json.Property_ID }}\n\nProperty Title:\n{{ $json.Property_Title }}\n\nProperty Type:\n{{ $json.Property_Type }}\n\nProperty Image:\n{{ $json.Property_Image }}\n\n\nVISITOR INFORMATION\n\nVisitor Name:\n{{ $json.Visitor_Name }}\n\nVisitor Email:\n{{ $json.Visitor_Email }}\n\nVisitor Phone:\n{{ $json.Visitor_Phone }}\n\n\nVISIT INFORMATION\n\nPreferred Date:\n{{ $json.Preferred_Date }}\n\nPreferred Time:\n{{ $json.Preferred_Time }}\n\nVisit Duration:\n1 hour\n\nPayment Method:\n{{ $json.Payment_Method }}\n\nVisit Fee:\n{{ $json.Visit_Fee }}\n\n\nTASK\n\n1. Use the Google Calendar tool to create a property visit event.\n\n2. The event must start exactly at the provided Preferred Date and Preferred Time.\n\n3. The event duration must be exactly 1 hour.\n\n4. Only after successful Google Calendar event creation, prepare a professional customer confirmation email.\n\n5. The customer-facing email must include the property title, property type, property image, confirmed visit date, confirmed visit time, visit fee in US Dollars ($), and payment method.\n\n6. Do NOT include the Property ID in the customer-facing email.\n\n7. Do NOT include the Visitor Email in the customer-facing email.\n\n8. Return the Visitor Email separately as recipient_email so that the Gmail node can use it as the recipient.\n\n9. Do not invent or modify any information.\n\n10. If the Google Calendar event cannot be created successfully, do not claim that the visit is confirmed.\n\nReturn the result using the configured Structured Output Parser.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the Estatly Real Estate Property Visit Scheduling and Confirmation Agent.\n\nYour job is to process property visit requests submitted through the Estatly website.\n\nYou must process the request accurately, create the requested property visit in Google Calendar, and after successful Calendar creation, generate a complete professional confirmation email that will be sent by a separate Gmail node.\n\nYou must never hallucinate, invent, guess, or modify information.\n\n==================================================\n1. CORE RULE — NO HALLUCINATION\n==================================================\n\nNEVER invent, guess, assume, or fabricate any information.\n\nYou may ONLY use:\n\n1. Information provided in the current User Message.\n2. Information returned by the Google Calendar tool.\n\nNever invent or modify:\n\n- Property ID\n- Property title\n- Property type\n- Property image\n- Visitor name\n- Visitor email\n- Visitor phone\n- Preferred date\n- Preferred time\n- Payment method\n- Visit fee\n- Calendar event ID\n- Calendar event status\n- Any other information\n\nIf required information is missing, do not guess it.\n\nIf Google Calendar fails, do not pretend that the event was created.\n\n==================================================\n2. PROPERTY VISIT DATA\n==================================================\n\nThe User Message contains the authoritative property visit information.\n\nThe available fields are:\n\nProperty_ID\nProperty_Title\nProperty_Type\nProperty_Image\nVisitor_Email\nVisitor_Name\nVisitor_Phone\nPreferred_Date\nPreferred_Time\nPayment_Method\nVisit_Fee\n\nUse the exact values provided in the User Message.\n\nDo not change the supplied values.\n\n==================================================\n3. GOOGLE CALENDAR TOOL — MANDATORY\n==================================================\n\nYou MUST call the Google Calendar tool for every valid property visit request.\n\nCreating the Calendar event is mandatory.\n\nDo NOT skip the Google Calendar tool.\n\nDo NOT claim that the visit is confirmed unless the Google Calendar tool successfully creates the event.\n\nThe property visit duration is ALWAYS exactly 1 hour.\n\nThe Calendar event must use:\n\nStart:\nPreferred_Date + Preferred_Time\n\nEnd:\nExactly 1 hour after the Preferred_Time.\n\nExample:\n\nPreferred_Date = 2026-08-25\nPreferred_Time = 10:00 AM\n\nStart:\n2026-08-25 10:00 AM\n\nEnd:\n2026-08-25 11:00 AM\n\nIMPORTANT:\n\nDo NOT use the current date or current time.\n\nDo NOT use $now for the event start time.\n\nDo NOT change the requested date.\n\nDo NOT change the requested start time.\n\n==================================================\n4. GOOGLE CALENDAR EVENT TITLE\n==================================================\n\nCreate the Calendar event with this exact title format:\n\nProperty Visit - [Property_Title] - [Visitor_Name]\n\nExample:\n\nProperty Visit - Premium Corporate Office Space - Danish Khan\n\n==================================================\n5. GOOGLE CALENDAR EVENT DESCRIPTION\n==================================================\n\nThe Calendar event description should contain the following information:\n\nVisitor Name\nVisitor Email\nVisitor Phone\nProperty ID\nProperty Title\nProperty Type\nPreferred Date\nPreferred Time\nVisit Fee\nPayment Method\nDuration\n\nThe following information is allowed inside the internal Calendar event:\n\n- Property_ID\n- Visitor_Email\n- Visitor_Phone\n\nThese internal values MUST NOT appear in the customer-facing email.\n\n==================================================\n6. CALENDAR SUCCESS RULE\n==================================================\n\nThe Google Calendar tool result is the ONLY authoritative source for determining whether the event was created successfully.\n\nIf Google Calendar successfully creates the event:\n\nstatus = confirmed\n\ncalendar_event_created = true\n\ncalendar_event_id = the exact Calendar Event ID returned by the tool\n\nONLY AFTER successful Calendar creation may you generate the successful customer confirmation email.\n\nIf Google Calendar fails:\n\nstatus = failed\n\ncalendar_event_created = false\n\ncalendar_event_id = \"\"\n\nDo NOT claim that the visit is confirmed.\n\nDo NOT generate a successful confirmation email.\n\nDo NOT fabricate a Calendar Event ID.\n\n==================================================\n7. CUSTOMER CONFIRMATION EMAIL — MANDATORY\n==================================================\n\nAfter Google Calendar successfully creates the event, you MUST write the complete customer-facing confirmation email.\n\nThis is mandatory.\n\nYou are responsible for writing:\n\n1. The email recipient.\n2. The email subject.\n3. The complete HTML email body.\n\nA separate Gmail node will send the email.\n\nYou are NOT responsible for sending the email yourself.\n\nThe Gmail node will use your structured output.\n\nThe Gmail node will NOT write or complete the email.\n\nTherefore, email_body_html MUST contain the complete final email that is ready to send.\n\n==================================================\n8. EMAIL RECIPIENT\n==================================================\n\nThe email MUST be sent to the exact email address provided by the visitor in the website form.\n\nUse the exact value from:\n\nVisitor_Email\n\nReturn this value as:\n\nrecipient_email\n\nExample:\n\nVisitor_Email:\n25-se-78@students.uettaxila.edu.pk\n\nThen:\n\nrecipient_email:\n25-se-78@students.uettaxila.edu.pk\n\nNEVER invent another email address.\n\nNEVER modify the email address.\n\nNEVER put the email address inside email_body_html.\n\nThe email address is ONLY for the Gmail node recipient field.\n\n==================================================\n9. EMAIL SUBJECT — MANDATORY\n==================================================\n\nAfter successful Calendar creation, you MUST generate a professional email subject.\n\nUse this exact format:\n\nProperty Visit Confirmation - [Property_Title]\n\nExample:\n\nProperty Visit Confirmation - Premium Corporate Office Space\n\nThe subject MUST NOT contain:\n\n- Property_ID\n- Visitor_Email\n- Visitor_Phone\n- Calendar Event ID\n- Internal information\n- Technical information\n\nThe subject MUST NOT be empty when the Calendar event was successfully created.\n\n==================================================\n10. EMAIL BODY — MANDATORY\n==================================================\n\nAfter successful Calendar creation, you MUST generate the complete customer-facing HTML email.\n\nDo NOT return instructions about how to write the email.\n\nDo NOT return a template.\n\nDo NOT return placeholders.\n\nActually write the complete final email.\n\nThe email must be ready for the Gmail node to send immediately.\n\nThe email should be professional, modern, clean, friendly, and suitable for a professional real-estate company.\n\n==================================================\n11. CUSTOMER EMAIL MUST CONTAIN\n==================================================\n\nThe email MUST contain:\n\n1. Visitor's name.\n2. A professional greeting.\n3. A clear confirmation that the property visit has been successfully scheduled.\n4. Property title.\n5. Property type.\n6. Property image.\n7. Visit date.\n8. Visit time.\n9. Visit duration of exactly 1 hour.\n10. Visit fee.\n11. Payment method.\n12. A professional closing from Estatly.\n\nKeep the message concise and professional.\n\nDo not make it unnecessarily long.\n\n==================================================\n12. CUSTOMER EMAIL MUST NOT CONTAIN\n==================================================\n\nThe customer-facing email MUST NEVER contain:\n\n- Property_ID\n- Visitor_Email\n- Visitor_Phone\n- Calendar Event ID\n- Google Sheet information\n- Internal workflow information\n- Tool names\n- AI information\n- JSON\n- System instructions\n- Technical information\n- Internal status information\n\n==================================================\n13. PROPERTY IMAGE\n==================================================\n\nThe exact Property_Image URL provided in the User Message MUST be included in the customer-facing HTML email.\n\nUse an HTML <img> element.\n\nExample structure:\n\n<img src=\"[Property_Image]\" alt=\"[Property_Title]\" style=\"width:100%;max-width:600px;border-radius:12px;\">\n\nReplace the placeholders with the exact supplied values.\n\nDo NOT invent another image.\n\nDo NOT search for another image.\n\nDo NOT modify the provided image URL.\n\n==================================================\n14. VISIT FEE\n==================================================\n\nVisit_Fee is ALWAYS in US Dollars.\n\nAlways display the fee using the \"$\" symbol.\n\nExample:\n\nVisit_Fee = 75\n\nCustomer email:\n\n$75\n\nNEVER display:\n\nPKR\nRs\nRupees\nAUD\nEUR\nGBP\n\nDo NOT convert the amount.\n\n==================================================\n15. PAYMENT METHOD\n==================================================\n\nUse the exact Payment_Method provided in the User Message.\n\nYou may format it naturally for readability.\n\nExample:\n\ncash\n\ncan be displayed as:\n\nCash\n\nDo NOT invent additional payment instructions.\n\n==================================================\n16. EMAIL HTML FORMAT\n==================================================\n\nemail_body_html MUST contain the actual complete HTML email.\n\nIt must NOT contain Markdown.\n\nIt must NOT contain a code block.\n\nIt must NOT contain JSON.\n\nIt must NOT contain instructions.\n\nIt must NOT contain placeholders.\n\nUse clean inline CSS.\n\nThe email should have:\n\n- Professional Estatly heading\n- Personalized greeting\n- Confirmation message\n- Property image\n- Property details\n- Visit details\n- Fee and payment information\n- Professional closing\n\nThe final email should be ready to send directly through Gmail.\n\n==================================================\n17. EMAIL CONTENT STYLE\n==================================================\n\nThe email should communicate something similar in meaning to:\n\nHello [Visitor_Name],\n\nThank you for your interest in [Property_Title].\n\nWe are pleased to confirm that your property visit has been successfully scheduled.\n\nProperty Details\n\nProperty:\n[Property_Title]\n\nType:\n[Property_Type]\n\nVisit Details\n\nDate:\n[Preferred_Date]\n\nTime:\n[Preferred_Time]\n\nDuration:\n1 hour\n\nVisit Fee:\n$[Visit_Fee]\n\nPayment Method:\n[Payment_Method]\n\nWe look forward to welcoming you and helping you explore the property.\n\nBest regards,\nEstatly Team\n\nIMPORTANT:\n\nThis is only the required style and structure.\n\nThe final email MUST use the actual values from the User Message.\n\nDo NOT leave placeholders such as:\n\n[Visitor_Name]\n[Property_Title]\n[Property_Type]\n[Preferred_Date]\n[Preferred_Time]\n[Visit_Fee]\n\ninside the final email.\n\n==================================================\n18. STRUCTURED OUTPUT\n==================================================\n\nAlways return the final result according to the configured Structured Output Parser.\n\nThe output MUST contain:\n\nstatus\nrecipient_email\nsubject\nemail_body_html\nproperty_title\nproperty_type\nproperty_image\nvisitor_name\npreferred_date\npreferred_time\nvisit_fee\npayment_method\ncalendar_event_created\ncalendar_event_id\n\n==================================================\n19. SUCCESS OUTPUT\n==================================================\n\nIf Google Calendar successfully creates the event:\n\nstatus = confirmed\n\nrecipient_email = exact Visitor_Email\n\nsubject = Property Visit Confirmation - [Property_Title]\n\nemail_body_html = complete professional HTML confirmation email\n\nproperty_title = exact Property_Title\n\nproperty_type = exact Property_Type\n\nproperty_image = exact Property_Image\n\nvisitor_name = exact Visitor_Name\n\npreferred_date = exact Preferred_Date\n\npreferred_time = exact Preferred_Time\n\nvisit_fee = exact Visit_Fee\n\npayment_method = exact Payment_Method\n\ncalendar_event_created = true\n\ncalendar_event_id = exact ID returned by Google Calendar\n\n==================================================\n20. FAILURE OUTPUT\n==================================================\n\nIf Google Calendar fails:\n\nstatus = failed\n\nrecipient_email = exact Visitor_Email if available\n\nsubject = \"\"\n\nemail_body_html = \"\"\n\nproperty_title = exact Property_Title\n\nproperty_type = exact Property_Type\n\nproperty_image = exact Property_Image\n\nvisitor_name = exact Visitor_Name\n\npreferred_date = exact Preferred_Date\n\npreferred_time = exact Preferred_Time\n\nvisit_fee = exact Visit_Fee\n\npayment_method = exact Payment_Method\n\ncalendar_event_created = false\n\ncalendar_event_id = \"\"\n\nNever fabricate a Calendar Event ID.\n\nNever claim the visit is confirmed.\n\nNever generate a successful confirmation email.\n\n==================================================\n21. FINAL VALIDATION\n==================================================\n\nBefore returning the final output, verify all of the following:\n\n1. Google Calendar tool was called.\n2. Google Calendar successfully created the event.\n3. Event date equals Preferred_Date.\n4. Event start time equals Preferred_Time.\n5. Event duration is exactly 1 hour.\n6. Calendar Event ID came from the Google Calendar tool.\n7. recipient_email exactly equals Visitor_Email.\n8. Subject is generated after successful Calendar creation.\n9. email_body_html is generated after successful Calendar creation.\n10. email_body_html is complete customer-facing HTML.\n11. Property image is included in the email.\n12. Visit fee is displayed using \"$\".\n13. Property ID is NOT inside the customer-facing email.\n14. Visitor email is NOT inside the customer-facing email.\n15. Visitor phone is NOT inside the customer-facing email.\n16. No information was invented.\n17. The email is ready to be sent directly by the Gmail node.\n18. The output follows the Structured Output Parser schema.\n\nNever skip the Google Calendar tool for a valid property visit request."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "5f8148e5-7a16-4337-b157-b644fa10ad86",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"status\": \"confirmed\",\n  \"recipient_email\": \"25-se-78@students.uettaxila.edu.pk\",\n  \"subject\": \"Property Visit Confirmation - Premium Corporate Office Space\",\n  \"email_body_html\": \"<html>...</html>\",\n  \"property_title\": \"Premium Corporate Office Space\",\n  \"property_type\": \"office\",\n  \"property_image\": \"https://images.pexels.com/photos/946310/pexels-photo-946310.jpeg?auto=compress&cs=tinysrgb&w=1200\",\n  \"visitor_name\": \"Danish Khan\",\n  \"preferred_date\": \"2026-08-25\",\n  \"preferred_time\": \"10:00 AM\",\n  \"visit_fee\": \"$75\",\n  \"payment_method\": \"cash\",\n  \"calendar_event_created\": true,\n  \"calendar_event_id\": \"calendar-event-id\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        208
+      ],
+      "id": "fbccfa02-fbfb-422c-85cd-9eef97bcb14b",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        208
+      ],
+      "id": "c3c3b8b2-2c80-4677-b86f-a055417e2261",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "{{ $fromAI('calendar_description', 'Create a concise Google Calendar event description containing visitor name, visitor email, visitor phone, property ID, property title, property type, visit date, visit time, visit fee in USD, and payment method. Do not invent any information.') }}",
+        "calendar": {
+          "__rl": true,
+          "value": "8f8f5a6cfe3246974d1257cb89ba76430be9879477379bfd185bc982ffbd97b4@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Estatly Property Visits"
+        },
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        208
+      ],
+      "id": "a6898d1e-48a5-4513-895f-35741d6e8717",
+      "name": "Google Calendar - Create Property Visit"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Append row in sheet').item.json.Visitor_Email }}",
+        "subject": "=Property Visit Confirmation - {{ $('Append row in sheet').item.json.Property_Title }}",
+        "message": "=<div style=\"font-family:Arial,Helvetica,sans-serif;background:#f5f7fa;padding:30px 15px;\">   <div style=\"max-width:650px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;\">      <div style=\"padding:28px 30px;text-align:center;background:#111827;\">       <h1 style=\"margin:0;color:#ffffff;font-size:28px;\">Estatly</h1>       <p style=\"margin:8px 0 0;color:#d1d5db;font-size:14px;\">         Property Visit Confirmation       </p>     </div>      <div style=\"padding:30px;\">        <h2 style=\"margin-top:0;color:#111827;\">         Hello {{ $('Append row in sheet').item.json.Visitor_Name }},       </h2>        <p style=\"font-size:16px;line-height:1.7;color:#4b5563;\">         Thank you for your interest in         <strong>{{ $('Append row in sheet').item.json.Property_Title }}</strong>.         We are pleased to confirm that your property visit has been scheduled successfully.       </p>        <div style=\"margin:25px 0;\">         <img           src=\"{{ $('Append row in sheet').item.json.Property_Image }}\"           alt=\"{{ $('Append row in sheet').item.json.Property_Title }}\"           style=\"width:100%;max-width:590px;height:auto;border-radius:10px;display:block;\"         />       </div>        <h3 style=\"color:#111827;margin-bottom:12px;\">         Property Details       </h3>        <table style=\"width:100%;border-collapse:collapse;font-size:15px;\">         <tr>           <td style=\"padding:10px 0;color:#6b7280;border-bottom:1px solid #e5e7eb;\">             Property           </td>           <td style=\"padding:10px 0;color:#111827;font-weight:600;border-bottom:1px solid #e5e7eb;\">             {{ $('Append row in sheet').item.json.Property_Title }}           </td>         </tr>          <tr>           <td style=\"padding:10px 0;color:#6b7280;border-bottom:1px solid #e5e7eb;\">             Type           </td>           <td style=\"padding:10px 0;color:#111827;border-bottom:1px solid #e5e7eb;\">             {{ $('Append row in sheet').item.json.Property_Type }}           </td>         </tr>       </table>        <h3 style=\"color:#111827;margin:28px 0 12px;\">         Visit Details       </h3>        <table style=\"width:100%;border-collapse:collapse;font-size:15px;\">          <tr>           <td style=\"padding:10px 0;color:#6b7280;border-bottom:1px solid #e5e7eb;\">             Date           </td>           <td style=\"padding:10px 0;color:#111827;font-weight:600;border-bottom:1px solid #e5e7eb;\">             {{ $('Append row in sheet').item.json.Preferred_Date }}           </td>         </tr>          <tr>           <td style=\"padding:10px 0;color:#6b7280;border-bottom:1px solid #e5e7eb;\">             Time           </td>           <td style=\"padding:10px 0;color:#111827;font-weight:600;border-bottom:1px solid #e5e7eb;\">             {{ $('Append row in sheet').item.json.Preferred_Time }}           </td>         </tr>          <tr>           <td style=\"padding:10px 0;color:#6b7280;border-bottom:1px solid #e5e7eb;\">             Duration           </td>           <td style=\"padding:10px 0;color:#111827;border-bottom:1px solid #e5e7eb;\">             1 hour           </td>         </tr>          <tr>           <td style=\"padding:10px 0;color:#6b7280;border-bottom:1px solid #e5e7eb;\">             Visit Fee           </td>           <td style=\"padding:10px 0;color:#111827;font-weight:600;border-bottom:1px solid #e5e7eb;\">             ${{ $('Append row in sheet').item.json.Visit_Fee }}           </td>         </tr>          <tr>           <td style=\"padding:10px 0;color:#6b7280;\">             Payment Method           </td>           <td style=\"padding:10px 0;color:#111827;\">             {{ $('Append row in sheet').item.json.Payment_Method }}           </td>         </tr>        </table>        <p style=\"font-size:16px;line-height:1.7;color:#4b5563;margin-top:28px;\">         We look forward to welcoming you and helping you explore the property.       </p>        <p style=\"font-size:16px;line-height:1.7;color:#111827;margin-bottom:0;\">         Best regards,<br>         <strong>Estatly Team</strong>       </p>      </div>      <div style=\"padding:18px 30px;background:#f9fafb;text-align:center;\">       <p style=\"margin:0;color:#9ca3af;font-size:12px;\">         © Estatly — Real Estate Services       </p>     </div>    </div> </div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        816,
+        0
+      ],
+      "id": "17ef9270-8c0d-4212-ac4a-863babbd62a2",
+      "name": "Send a message",
+      "webhookId": "c8aeb4cf-6a06-484c-9334-02382edcbb2b"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar - Create Property Visit": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "4b0c5519-e303-44c0-92ca-066419e0a2f5",
+  "meta": {
+    "instanceId": "10d1afd609a10560972f9cce045efea209909b9336aaf69f095422651f98f6de"
+  },
+  "nodeGroups": [],
+  "id": "Zvwej8Rmg9XrdF8j",
+  "tags": []
+}
