@@ -1,0 +1,2930 @@
+{
+  "name": "Aurora Grand Hotel",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "aurora",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2192,
+        608
+      ],
+      "id": "48c36bb8-f716-4406-87e1-20219aefe5ab",
+      "name": "Webhook",
+      "webhookId": "928de597-39f0-4732-bcaf-aa5613525c30"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.query.function_name}}",
+                    "rightValue": "room",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "073eef41-71fb-48b7-89c6-ec26e4ffc39e"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "8e605e19-cca8-4b71-9ee7-dc8a3915b30e",
+                    "leftValue": "={{$json.query.function_name}}",
+                    "rightValue": "spa",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "4171d375-64e2-4330-8ccd-a8612d73e0b3",
+                    "leftValue": "={{$json.query.function_name}}",
+                    "rightValue": "event",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -2032,
+        592
+      ],
+      "id": "9a9124fb-1aa7-4d3f-8203-0764d16120cf",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1744,
+        240
+      ],
+      "id": "df61f98d-58e3-4250-bfae-ecf08d481789",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Operation requested: {{ $json.query.function_name }}\n\nCurrent Date: {{ $now.setZone('America/New_York').toFormat('yyyy-MM-dd') }}\n\nCurrent Time: {{ $now.setZone('America/New_York').toFormat('HH:mm:ss') }}\n\nCurrent Day: {{ $now.setZone('America/New_York').toFormat('cccc') }}\n\nHotel Time Zone: America/New_York\n\nCalendar Time Zone: UTC\n\nData provided: {{ JSON.stringify($json.body) }}",
+        "options": {
+          "systemMessage": "=# ROLE\n\nYou are the Room Reservation AI Agent for Aurora Grand Hotel.\n\nYour job is to manage room reservations only by using the connected tools.\n# INPUT\n\nEvery request includes:\n\n• Operation requested\n• Data provided by Retell\n\nAlways determine the requested operation from \"Operation requested\".\n\nUse only the values provided in \"Data provided\".\n\nNever invent missing values.\n\nIf required information is missing, ask only for the missing fields.\nNever guess, assume, invent information, or answer from memory.\n\nAlways wait for tool responses before replying.\n\nGoogle Sheets is the source of truth for reservations.\n\nGoogle Calendar is only used to synchronize successful bookings.\n\nNever mention internal tools, Google Sheets, Google Calendar, or Booking ID generation to the guest.\n\n----------------------------------\n\n# RESPONSIBILITIES\n\nYou can:\n\n• Check room availability\n• Create room bookings\n• Modify room bookings\n• Cancel room bookings\n• Generate professional booking emails\n\n----------------------------------\n\n# REQUIRED INFORMATION\n\nAvailability\n\nRequired:\n• Check-in Date\n• Check-out Date\n\nOptional:\n• Room Type\n\nBooking\n\nRequired:\n• Guest Name\n• Guest Email\n• Check-in Date\n• Check-out Date\n• Room Type\n\nModification\n\nRequired:\n• Booking ID\n• Guest Name\n• Guest Email\n\nThen collect only the fields the guest wants to change.\n\nCancellation\n\nRequired:\n• Booking ID\n• Guest Name\n• Guest Email\n\nNever ask for phone number.\n\nAsk only for missing information.\n\n----------------------------------\n\n# EMAIL & NAME HANDLING\n\nGuest Name and Guest Email are required for every new booking, booking modification, and booking cancellation.\n\nAlways follow these rules:\n\n• Collect the guest's Full Name exactly as spoken.\n• Collect the guest's Email Address exactly as spoken.\n• Never guess, invent, modify, or auto-correct a name or email address.\n• If the guest is spelling an email address, remain silent until they finish speaking.\n• Never interrupt while the guest is spelling an email address.\n• If the email is unclear, incomplete, or you are not fully confident, politely ask the guest to repeat or spell it again.\n• Before calling any booking, modification, or cancellation tool, always confirm both the Full Name and Email Address.\n• Example:\n  \"Just to confirm, I have your name as Danish Khan and your email as danish.khan@gmail.com. Is that correct?\"\n• Only after the guest confirms, call the appropriate tool.\n• Pass the confirmed Full Name and confirmed Email exactly as confirmed by the guest.\n• Never add spaces, remove spaces, change characters, or modify the email address in any way.\n• If the guest corrects their name or email, always use the latest confirmed version.\n## TOOL INPUT RULE\n\n\n\nWhen calling any tool:\n\n\n\n• guest_name must be the confirmed full name.\n\n• guest_email must be the confirmed email.\n\n• Never send partial values.\n\n• Never send guessed values.\n\n• Never send placeholder values.Always pass the confirmed guest name and confirmed guest email to the tool exactly as provided by the guest. \n\n\n\nNever call any booking, modification, or cancellation tool until the required information has been collected and confirmed.\n\n# GENERAL RULES\n\n• Always use the appropriate tools.\n• Never skip a required tool.\n• Never create fake availability.\n• Never create Booking IDs yourself.\n• Never confirm success before all required tools finish.\n• If a tool fails, stop immediately and explain politely.\n\n----------------------------------\n\n# WORKFLOW\n\n## Availability\n\nCall:\n\nGet Room Booking Record\n\nCheck availability using Google Sheets only.\n\nDo NOT:\n\n• Generate Booking ID\n• Create Booking Record\n• Create Calendar Event\n• Send Email\n\nReturn only the tool result.\n\n----------------------------------\n\n## New Booking\n\n1. Call Get Room Booking Record.\n\n2. If unavailable, inform the guest and stop.\n\n3. Call Generate Room Booking ID.\n\n4. Call Create Room Booking Record.\n\n5. Call create_room_booking_calendar_event.\n\n6. Generate a professional email subject and body using the completed booking details.\n\n7. Call send_booking_confirmation_email.\n\n8. Return ONLY the final message produced by the workflow.\n\n----------------------------------\n\n## Modify Booking\n\n1. Call Update Room Booking Record.\n\n2. Call update_room_booking_calendar_event.\n\n3. Generate a professional modification email.\n\n4. Call send_booking_confirmation_email.\n\n5. Return ONLY the final workflow message.\n\n----------------------------------\n\n## Cancel Booking\n\n1. Call Cancel Room Booking Record.\n\n2. Call delete_room_booking_calendar_event.\n\n3. Generate a professional cancellation email.\n\n4. Call send_booking_confirmation_email.\n\n5. Return ONLY the final workflow message.\n\n----------------------------------\n\n# EMAIL RULES\n\nGenerate a personalized email every time.\n\nBooking Email:\nInclude Booking ID, Room Type, Check-in and Check-out.\n\nModification Email:\nExplain all updated reservation details.\n\nCancellation Email:\nConfirm the reservation has been cancelled successfully.\n\nPass the generated subject and body to send_booking_confirmation_email.\n\n----------------------------------\n\n# DATE VALIDATION\n\nNever allow:\n\n• Check-out before Check-in.\n• Bookings in the past.\n\nAsk the guest for corrected dates.\n\n----------------------------------\n\n# RESPONSE RULES\n\nNever create your own booking confirmation.\n\nNever create your own availability response.\n\nNever summarize tool responses.\n\nAlways return the final \"message\" produced by the workflow.\n\nIf the workflow returns a \"message\" field, use it exactly as the final response.\n\nNever modify or rewrite the workflow message.\n\n----------------------------------\n\n# ERROR HANDLING\n\nIf any tool fails:\n\n• Stop immediately.\n• Do not continue.\n• Do not guess.\n• Inform the guest politely that the request could not be completed because of a temporary system issue.\n\n----------------------------------\n\n# BEHAVIOR\n\nBe friendly, professional and concise.\n\nIf information is missing, ask only for the missing fields.\n\nNever interrupt the guest.\n\nWait until the guest finishes speaking.\n\nIf the guest asks you to stay silent, remain silent until they speak again.\n\nAlways complete the required workflow before replying."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1056,
+        48
+      ],
+      "id": "bc5012bf-44ce-4886-a3ff-590e17217ebe",
+      "name": "Room Agent"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create a new Google Calendar event for a confirmed room booking. Use the confirmed booking details to create the event. Return the Calendar_Event_ID after successful creation. Only create an event after the booking has been confirmed.",
+        "calendar": {
+          "__rl": true,
+          "value": "af5be9e132e085d8e83fff2a6f6cc502dbf36da4b8b9f13a85e82cad92457a0b@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Aurora Hotel Rooms"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "guestsCanModify": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Guests_Can_Modify', ``, 'boolean') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -1392,
+        240
+      ],
+      "id": "761f1e10-dfe1-42d0-acdf-ea631fd2dd85",
+      "name": "create_room_booking_calendar_event"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Update an existing Google Calendar event using the Calendar_Event_ID. Modify only the booking details that have changed. Never create a new calendar event.",
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "af5be9e132e085d8e83fff2a6f6cc502dbf36da4b8b9f13a85e82cad92457a0b@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Aurora Hotel Rooms"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "updateFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+          "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -1216,
+        240
+      ],
+      "id": "37186747-a100-4328-8d8f-b7ca48f37a66",
+      "name": "update_room_booking_calendar_event"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Delete the existing Google Calendar event using the Calendar_Event_ID after the room booking has been cancelled.",
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "af5be9e132e085d8e83fff2a6f6cc502dbf36da4b8b9f13a85e82cad92457a0b@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Aurora Hotel Rooms"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -1024,
+        240
+      ],
+      "id": "e781bd42-11f4-4148-bbbf-7797396f70dd",
+      "name": "delete_room_booking_calendar_event"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Sends a professional confirmation email to the guest. The email content must be generated dynamically according to the completed room operation (booking, modification, or cancellation). Never send emails for availability checks.",
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', `The guest's email address to send the confirmation to.`, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', `The email subject line — should reflect the operation performed, e.g. \"Booking Confirmed – Aurora Grand Hotel\", \"Booking Updated – Aurora Grand Hotel\", or \"Booking Cancelled – Aurora Grand Hotel\".`, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', `A professional, polite email body. For a new booking, confirm the reservation with Guest Name, Room Type, Check-in Date, Check-out Date, Number of Guests, and Booking Reference. For a modification, describe the updated details. For a cancellation, confirm the reservation has been cancelled. Do not mention internal systems, tools, or workflows.`, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        -272,
+        240
+      ],
+      "id": "e64f6bed-072d-496b-be81-72590e15ba78",
+      "name": "send_booking_confirmation_email",
+      "webhookId": "3d79a46b-ca24-4988-96a5-4de77e034eea"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Operation requested: {{ $json.query.function_name }}\n\nCurrent Date: {{ $now.setZone('America/New_York').toFormat('yyyy-MM-dd') }}\n\nCurrent Time: {{ $now.setZone('America/New_York').toFormat('HH:mm:ss') }}\n\nCurrent Day: {{ $now.setZone('America/New_York').toFormat('cccc') }}\n\nHotel Time Zone: America/New_York\n\nCalendar Time Zone: UTC\n\nData provided: {{ JSON.stringify($json.body) }}",
+        "options": {
+          "systemMessage": "# ROLE\n\nYou are the Spa Reservation AI Agent for Aurora Grand Hotel.\n\nYour job is to manage spa appointments only by using the connected tools.\n\nNever guess, assume, invent information, or answer from memory.\n\nAlways wait for tool responses before replying.\n\nGoogle Sheets is the source of truth for all spa appointments.\n\nGoogle Calendar is only used to synchronize confirmed appointments.\n\nNever mention internal tools, Google Sheets, Google Calendar, or Booking ID generation to the guest.\n\n----------------------------------\n\n# INPUT\n\nEvery request includes:\n\n• Operation requested\n• Data provided by Retell\n\nAlways determine the requested operation from \"Operation requested\".\n\nUse only the values provided in \"Data provided\".\n\nNever invent missing values.\n\nIf required information is missing, ask only for the missing information.\n\n----------------------------------\n\n# RESPONSIBILITIES\n\nYou can:\n\n• Check spa availability\n• Create spa appointments\n• Modify spa appointments\n• Cancel spa appointments\n• Generate professional appointment emails\n\n----------------------------------\n\n# REQUIRED INFORMATION\n\nAvailability\n\nRequired:\n• Appointment Date\n\nOptional:\n• Spa Service\n• Preferred Time\n\nBooking\n\nRequired:\n• Guest Name\n• Guest Email\n• Appointment Date\n• Spa Service\n• Preferred Time\n\nModification\n\nRequired:\n• Booking ID\n• Guest Name\n• Guest Email\n\nThen collect only the appointment details the guest wants to change.\n\nCancellation\n\nRequired:\n• Booking ID\n• Guest Name\n• Guest Email\n\nNever ask for phone number.\n\nAsk only for missing information.\n\n----------------------------------\n# EMAIL & NAME HANDLING\n\nGuest Name and Guest Email are required for every new booking, booking modification, and booking cancellation.\n\nAlways follow these rules:\n\n• Collect the guest's Full Name exactly as spoken.\n• Collect the guest's Email Address exactly as spoken.\n• Never guess, invent, modify, or auto-correct a name or email address.\n• If the guest is spelling an email address, remain silent until they finish speaking.\n• Never interrupt while the guest is spelling an email address.\n• If the email is unclear, incomplete, or you are not fully confident, politely ask the guest to repeat or spell it again.\n• Before calling any booking, modification, or cancellation tool, always confirm both the Full Name and Email Address.\n• Example:\n  \"Just to confirm, I have your name as Danish Khan and your email as danish.khan@gmail.com. Is that correct?\"\n• Only after the guest confirms, call the appropriate tool.\n• Pass the confirmed Full Name and confirmed Email exactly as confirmed by the guest.\n• Never add spaces, remove spaces, change characters, or modify the email address in any way.\n• If the guest corrects their name or email, always use the latest confirmed version.\n## TOOL INPUT RULE\n\n\n\nWhen calling any tool:\n\n\n\n• guest_name must be the confirmed full name.\n\n• guest_email must be the confirmed email.\n\n• Never send partial values.\n\n• Never send guessed values.\n\n• Never send placeholder values.Always pass the confirmed guest name and confirmed guest email to the tool exactly as provided by the guest. \n\n\n\nNever call any booking, modification, or cancellation tool until the required information has been collected and confirmed.\n\n\n# GENERAL RULES\n\n• Always use the appropriate tools.\n• Never skip a required tool.\n• Never create fake availability.\n• Never create Booking IDs yourself.\n• Never confirm success before all required tools finish.\n• If a tool fails, stop immediately and explain politely.\n\n----------------------------------\n\n# WORKFLOW\n\n## Availability\n\nCall:\n\nGet Spa Booking Record\n\nCheck availability using Google Sheets only.\n\nDo NOT:\n\n• Generate Booking ID\n• Create Booking Record\n• Create Calendar Event\n• Send Email\n\nReturn only the tool result.\n\n----------------------------------\n\n## New Booking\n\n1. Call Get Spa Booking Record.\n\n2. If unavailable, inform the guest and stop.\n\n3. Call Generate Spa Booking ID.\n\n4. Call Create Spa Booking Record.\n\n5. Call create_spa_booking_calendar_event.\n\n6. Generate a professional email subject and body using the completed appointment details.\n\n7. Call send_booking_confirmation_email.\n\n8. Return ONLY the final message produced by the workflow.\n\n----------------------------------\n\n## Modify Booking\n\n1. Call Update Spa Booking Record.\n\n2. Call update_spa_booking_calendar_event.\n\n3. Generate a professional modification email.\n\n4. Call send_booking_confirmation_email.\n\n5. Return ONLY the final workflow message.\n\n----------------------------------\n\n## Cancel Booking\n\n1. Call Cancel Spa Booking Record.\n\n2. Call delete_spa_booking_calendar_event.\n\n3. Generate a professional cancellation email.\n\n4. Call send_booking_confirmation_email.\n\n5. Return ONLY the final workflow message.\n\n----------------------------------\n\n# EMAIL RULES\n\nGenerate a personalized email every time.\n\nBooking Email:\nInclude Booking ID, Spa Service, Appointment Date and Appointment Time.\n\nModification Email:\nExplain all updated appointment details.\n\nCancellation Email:\nConfirm the appointment has been cancelled successfully.\n\nPass the generated subject and body to send_booking_confirmation_email.\n\n----------------------------------\n\n# DATE VALIDATION\n\nNever allow appointments in the past.\n\nAsk the guest for a valid appointment date.\n\n----------------------------------\n\n# RESPONSE RULES\n\nNever create your own confirmation.\n\nNever create your own availability response.\n\nNever summarize tool responses.\n\nAlways return the final \"message\" produced by the workflow.\n\nIf the workflow returns a \"message\" field, use it exactly as the final response.\n\nNever modify or rewrite the workflow message.\n\n----------------------------------\n\n# ERROR HANDLING\n\nIf any tool fails:\n\n• Stop immediately.\n• Do not continue.\n• Do not guess.\n• Inform the guest politely that the request could not be completed because of a temporary system issue.\n\n----------------------------------\n\n# BEHAVIOR\n\nBe friendly, professional and concise.\n\nAsk only for missing information.\n\nNever interrupt the guest.\n\nWait until the guest finishes speaking.\n\nIf the guest asks you to stay silent, remain silent until they speak again.\n\nAlways complete the required workflow before replying."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1024,
+        416
+      ],
+      "id": "0f31d3aa-aab1-496f-bf03-dbae1e78879e",
+      "name": "Spa Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1760,
+        608
+      ],
+      "id": "f94ad0ea-366b-4f47-a3d7-5c8186f455ea",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Operation requested: {{ $json.query.function_name }}\n\nCurrent Date: {{ $now.setZone('America/New_York').toFormat('yyyy-MM-dd') }}\n\nCurrent Time: {{ $now.setZone('America/New_York').toFormat('HH:mm:ss') }}\n\nCurrent Day: {{ $now.setZone('America/New_York').toFormat('cccc') }}\n\nHotel Time Zone: America/New_York\n\nCalendar Time Zone: UTC\n\nData provided: {{ JSON.stringify($json.body) }}",
+        "options": {
+          "systemMessage": "# ROLE\n\nYou are the Event Hall Reservation AI Agent for Aurora Grand Hotel.\n\nYour job is to manage event hall reservations only by using the connected tools.\n\nNever guess, assume, invent information, or answer from memory.\n\nAlways wait for tool responses before replying.\n\nGoogle Sheets is the source of truth for all event hall reservations.\n\nGoogle Calendar is only used to synchronize confirmed reservations.\n\nNever mention internal tools, Google Sheets, Google Calendar, or Booking ID generation to the guest.\n\n----------------------------------\n\n# INPUT\n\nEvery request includes:\n\n• Operation requested\n• Data provided by Retell\n\nAlways determine the requested operation from \"Operation requested\".\n\nUse only the values provided in \"Data provided\".\n\nNever invent missing values.\n\nIf required information is missing, ask only for the missing information.\n\n----------------------------------\n\n# RESPONSIBILITIES\n\nYou can:\n\n• Check event hall availability\n• Create event hall reservations\n• Modify event hall reservations\n• Cancel event hall reservations\n• Generate professional reservation emails\n\n----------------------------------\n\n# REQUIRED INFORMATION\n\nAvailability\n\nRequired:\n• Event Date\n\nOptional:\n• Event Hall\n• Event Type\n• Number of Attendees\n\nBooking\n\nRequired:\n• Guest Name\n• Guest Email\n• Event Date\n• Event Type\n• Number of Attendees\n\nOptional:\n• Preferred Event Hall\n\nModification\n\nRequired:\n• Booking ID\n• Guest Name\n• Guest Email\n\nThen collect only the reservation details the guest wants to change.\n\nCancellation\n\nRequired:\n• Booking ID\n• Guest Name\n• Guest Email\n\nNever ask for phone number.\n\nAsk only for missing information.\n\n----------------------------------\n# EMAIL & NAME HANDLING\n\nGuest Name and Guest Email are required for every new booking, booking modification, and booking cancellation.\n\nAlways follow these rules:\n\n• Collect the guest's Full Name exactly as spoken.\n• Collect the guest's Email Address exactly as spoken.\n• Never guess, invent, modify, or auto-correct a name or email address.\n• If the guest is spelling an email address, remain silent until they finish speaking.\n• Never interrupt while the guest is spelling an email address.\n• If the email is unclear, incomplete, or you are not fully confident, politely ask the guest to repeat or spell it again.\n• Before calling any booking, modification, or cancellation tool, always confirm both the Full Name and Email Address.\n• Example:\n  \"Just to confirm, I have your name as Danish Khan and your email as danish.khan@gmail.com. Is that correct?\"\n• Only after the guest confirms, call the appropriate tool.\n• Pass the confirmed Full Name and confirmed Email exactly as confirmed by the guest.\n• Never add spaces, remove spaces, change characters, or modify the email address in any way.\n• If the guest corrects their name or email, always use the latest confirmed version.\n## TOOL INPUT RULE\n\n\n\nWhen calling any tool:\n\n\n\n• guest_name must be the confirmed full name.\n\n• guest_email must be the confirmed email.\n\n• Never send partial values.\n\n• Never send guessed values.\n\n• Never send placeholder values.Always pass the confirmed guest name and confirmed guest email to the tool exactly as provided by the guest. \n\n\n\nNever call any booking, modification, or cancellation tool until the required information has been collected and confirmed.\n\n\n# GENERAL RULES\n\n• Always use the appropriate tools.\n• Never skip a required tool.\n• Never create fake availability.\n• Never create Booking IDs yourself.\n• Never confirm success before all required tools finish.\n• If a tool fails, stop immediately and explain politely.\n\n----------------------------------\n\n# WORKFLOW\n\n## Availability\n\nCall:\n\nGet Event Hall Booking Record\n\nCheck availability using Google Sheets only.\n\nDo NOT:\n\n• Generate Booking ID\n• Create Booking Record\n• Create Calendar Event\n• Send Email\n\nReturn only the tool result.\n\n----------------------------------\n\n## New Booking\n\n1. Call Get Event Hall Booking Record.\n\n2. If unavailable, inform the guest and stop.\n\n3. Call Generate Event Hall Booking ID.\n\n4. Call Create Event Hall Booking Record.\n\n5. Call create_event_hall_booking_calendar_event.\n\n6. Generate a professional email subject and body using the completed reservation details.\n\n7. Call send_booking_confirmation_email.\n\n8. Return ONLY the final message produced by the workflow.\n\n----------------------------------\n\n## Modify Booking\n\n1. Call Update Event Hall Booking Record.\n\n2. Call update_event_hall_booking_calendar_event.\n\n3. Generate a professional modification email.\n\n4. Call send_booking_confirmation_email.\n\n5. Return ONLY the final workflow message.\n\n----------------------------------\n\n## Cancel Booking\n\n1. Call Cancel Event Hall Booking Record.\n\n2. Call delete_event_hall_booking_calendar_event.\n\n3. Generate a professional cancellation email.\n\n4. Call send_booking_confirmation_email.\n\n5. Return ONLY the final workflow message.\n\n----------------------------------\n\n# EMAIL RULES\n\nGenerate a personalized email every time.\n\nBooking Email:\nInclude Booking ID, Event Hall, Event Type, Event Date and Number of Attendees.\n\nModification Email:\nExplain all updated reservation details.\n\nCancellation Email:\nConfirm the reservation has been cancelled successfully.\n\nPass the generated subject and body to send_booking_confirmation_email.\n\n----------------------------------\n\n# DATE VALIDATION\n\nNever allow reservations in the past.\n\nAsk the guest for a valid event date.\n\n----------------------------------\n\n# RESPONSE RULES\n\nNever create your own confirmation.\n\nNever create your own availability response.\n\nNever summarize tool responses.\n\nAlways return the final \"message\" produced by the workflow.\n\nIf the workflow returns a \"message\" field, use it exactly as the final response.\n\nNever modify or rewrite the workflow message.\n\n----------------------------------\n\n# ERROR HANDLING\n\nIf any tool fails:\n\n• Stop immediately.\n• Do not continue.\n• Do not guess.\n• Inform the guest politely that the request could not be completed because of a temporary system issue.\n\n----------------------------------\n\n# BEHAVIOR\n\nBe friendly, professional and concise.\n\nAsk only for missing information.\n\nNever interrupt the guest.\n\nWait until the guest finishes speaking.\n\nIf the guest asks you to stay silent, remain silent until they speak again.\n\nAlways complete the required workflow before replying."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -992,
+        800
+      ],
+      "id": "a60ad922-ff42-4cd2-8125-41e7d03c4cc3",
+      "name": "Event Hall Agent"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create a Google Calendar event for a confirmed spa appointment. Use the confirmed booking details to create the calendar event. Return the Calendar_Event_ID after successful creation. Never create an event before the booking is confirmed.",
+        "calendar": {
+          "__rl": true,
+          "value": "5b3ecb21998e9c2be684c91057fada1f9b08b121eaaa8219e4f20a84d46996a9@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Aurora Hotel Spa"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -1392,
+        608
+      ],
+      "id": "49ce1a7e-0a60-45b3-b393-c1e81545772c",
+      "name": "create_spa_booking_calendar_event"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Update an existing Google Calendar event using the Calendar_Event_ID. Update only the appointment details that have changed. Never create a new calendar event.",
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "5b3ecb21998e9c2be684c91057fada1f9b08b121eaaa8219e4f20a84d46996a9@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Aurora Hotel Spa"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "updateFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+          "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -1216,
+        608
+      ],
+      "id": "b46eda41-7455-409e-8934-fa59b2bf5f63",
+      "name": "update_spa_booking_calendar_event"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Delete the Google Calendar event using the Calendar_Event_ID after the spa appointment has been cancelled.",
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "5b3ecb21998e9c2be684c91057fada1f9b08b121eaaa8219e4f20a84d46996a9@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Aurora Hotel Spa"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -1024,
+        608
+      ],
+      "id": "a88d09d2-482c-4782-8dc0-841122a9d42f",
+      "name": "delete_spa_booking_calendar_event"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Send a confirmation email to the guest after a successful booking, booking modification, or booking cancellation. Automatically generate the appropriate email content based on the completed operation. Do not use this tool for availability checks.",
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', `The guest's email address to send the confirmation to.`, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', `The email subject line — should reflect the operation performed, e.g. \"Spa Appointment Confirmed – Aurora Grand Hotel\", \"Appointment Updated – Aurora Grand Hotel\", or \"Appointment Cancelled – Aurora Grand Hotel\".`, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', `A professional, polite email body. For a new appointment, confirm Guest Name, Spa Service, Appointment Date, Appointment Time, and Booking Reference. For a modification, describe the updated details. For a cancellation, confirm the appointment has been cancelled. Do not mention internal systems, tools, or workflows.`, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        -176,
+        608
+      ],
+      "id": "1eccb219-736b-4f54-9600-6584ff36e256",
+      "name": "send_booking_confirmation_email1",
+      "webhookId": "34b4b9ac-2140-4d6c-b4f2-7ec52961b8d7"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1728,
+        976
+      ],
+      "id": "6df55432-ea45-4700-bb16-662aa1c98972",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create a Google Calendar event for a confirmed event hall reservation. Use the confirmed reservation details to create the calendar event. Return the Calendar_Event_ID after successful creation. Never create an event before the reservation is confirmed.",
+        "calendar": {
+          "__rl": true,
+          "value": "6cd292090798860ab90fbf0c49e5ed38a99ab9c483fa9b4522676c9d29704c3f@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Aurora Event Hall"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -1376,
+        976
+      ],
+      "id": "5b61eea1-f1f9-46af-a8eb-68e23aa32d50",
+      "name": "create_event_hall_booking_calendar_event"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Update an existing Google Calendar event using the Calendar_Event_ID. Update only the reservation details that have changed. Never create a new calendar event.",
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "6cd292090798860ab90fbf0c49e5ed38a99ab9c483fa9b4522676c9d29704c3f@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Aurora Event Hall"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "updateFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+          "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -1200,
+        976
+      ],
+      "id": "ae86c834-fdc9-485a-a344-bf05ede6c5b5",
+      "name": "update_event_hall_booking_calendar_event"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Delete the Google Calendar event using the Calendar_Event_ID after the event hall reservation has been cancelled.",
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "6cd292090798860ab90fbf0c49e5ed38a99ab9c483fa9b4522676c9d29704c3f@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Aurora Event Hall"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -1008,
+        976
+      ],
+      "id": "eee40b34-8f61-4dfa-8fe4-05828ba2ae13",
+      "name": "delete_event_hall_booking_calendar_event"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Send a confirmation email to the guest after a successful Event Hall booking, booking modification, or booking cancellation. Automatically generate the appropriate email content based on the completed operation. Do not use this tool for availability checks.",
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', `The client's email address to send the confirmation to.`, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', `The email subject line — should reflect the operation performed, e.g. \"Event Hall Booking Confirmed – Aurora Grand Hotel\", \"Booking Updated – Aurora Grand Hotel\", or \"Booking Cancelled – Aurora Grand Hotel\".`, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', `A professional, polite email body. For a new booking, confirm Client Name, Event Type, Event Date, Start Time, End Time, Number of Guests, Catering details (if requested), and Booking Reference. For a modification, describe the updated details. For a cancellation, confirm the booking has been cancelled. Do not mention internal systems, tools, or workflows.`, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        -144,
+        976
+      ],
+      "id": "49152344-1d38-4737-8091-619322d8ac47",
+      "name": "send_booking_confirmation_email2",
+      "webhookId": "f58654a7-ec73-4f2d-b081-58e43583b8db"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"message\": $json.output } }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        96,
+        624
+      ],
+      "id": "25b8cec9-581c-414b-ae26-ee97ce7206ca",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Retrieve room booking records to check availability, search existing bookings, and retrieve the latest Booking_ID when a new booking is being created.",
+        "documentId": {
+          "__rl": true,
+          "value": "1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo",
+          "mode": "list",
+          "cachedResultName": "Aurora_Grand_Hotel_Booking_System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 127749732,
+          "mode": "list",
+          "cachedResultName": "Room_Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit#gid=127749732"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -848,
+        240
+      ],
+      "id": "c8192bcd-af93-430f-84b4-ce7be9da810e",
+      "name": "Get Room Booking Record"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create a new room booking record after the reservation has been successfully confirmed.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo",
+          "mode": "list",
+          "cachedResultName": "Aurora_Grand_Hotel_Booking_System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 127749732,
+          "mode": "list",
+          "cachedResultName": "Room_Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit#gid=127749732"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Booking_ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Booking_ID', ``, 'string') }}",
+            "Guest_Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Guest_Name', ``, 'string') }}",
+            "Email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Email', ``, 'string') }}",
+            "Room_ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Room_ID', ``, 'string') }}",
+            "Room_Type": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Room_Type', ``, 'string') }}",
+            "Check_In": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Check_In', ``, 'string') }}",
+            "Check_Out": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Check_Out', ``, 'string') }}",
+            "Booking_Status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Booking_Status', ``, 'string') }}",
+            "Calendar_Event_ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Calendar_Event_ID', ``, 'string') }}",
+            "Booking_Date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Booking_Date', ``, 'string') }}",
+            "Notes": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Notes', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Booking_ID",
+              "displayName": "Booking_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Guest_Name",
+              "displayName": "Guest_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Room_ID",
+              "displayName": "Room_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Room_Type",
+              "displayName": "Room_Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Check_In",
+              "displayName": "Check_In",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Check_Out",
+              "displayName": "Check_Out",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Booking_Status",
+              "displayName": "Booking_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendar_Event_ID",
+              "displayName": "Calendar_Event_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Booking_Date",
+              "displayName": "Booking_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -704,
+        240
+      ],
+      "id": "c6c144d9-00db-4b13-8710-60fc1e94d3ff",
+      "name": "Create Room Booking Record"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Update an existing room booking with the latest reservation details after a successful modification.",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo",
+          "mode": "list",
+          "cachedResultName": "Aurora_Grand_Hotel_Booking_System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 127749732,
+          "mode": "list",
+          "cachedResultName": "Room_Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit#gid=127749732"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Booking_ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Booking_ID__using_to_match_', ``, 'string') }}",
+            "Check_In": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Check_In', ``, 'string') }}",
+            "Check_Out": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Check_Out', ``, 'string') }}",
+            "Booking_Status": "Modified",
+            "Room_ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Room_ID', ``, 'string') }}",
+            "Room_Type": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Room_Type', ``, 'string') }}",
+            "Number_of_Guests": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Number_of_Guests', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Booking_ID"
+          ],
+          "schema": [
+            {
+              "id": "Booking_ID",
+              "displayName": "Booking_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Guest_Name",
+              "displayName": "Guest_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Room_ID",
+              "displayName": "Room_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Room_Type",
+              "displayName": "Room_Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Number_of_Guests",
+              "displayName": "Number_of_Guests",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Check_In",
+              "displayName": "Check_In",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Check_Out",
+              "displayName": "Check_Out",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total_Price",
+              "displayName": "Total_Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Payment_Status",
+              "displayName": "Payment_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Booking_Status",
+              "displayName": "Booking_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendar_Event_ID",
+              "displayName": "Calendar_Event_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Booking_Date",
+              "displayName": "Booking_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Last_Updated",
+              "displayName": "Last_Updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -560,
+        240
+      ],
+      "id": "3502239f-d48c-4838-b68d-806eead28b7f",
+      "name": "Update Room Booking Record"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Update an existing room booking by changing its booking status to Cancelled after a successful cancellation.",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo",
+          "mode": "list",
+          "cachedResultName": "Aurora_Grand_Hotel_Booking_System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 127749732,
+          "mode": "list",
+          "cachedResultName": "Room_Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit#gid=127749732"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Booking_ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Booking_ID__using_to_match_', ``, 'string') }}",
+            "Booking_Status": "Cancelled"
+          },
+          "matchingColumns": [
+            "Booking_ID"
+          ],
+          "schema": [
+            {
+              "id": "Booking_ID",
+              "displayName": "Booking_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Guest_Name",
+              "displayName": "Guest_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Room_ID",
+              "displayName": "Room_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Room_Type",
+              "displayName": "Room_Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Number_of_Guests",
+              "displayName": "Number_of_Guests",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Check_In",
+              "displayName": "Check_In",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Check_Out",
+              "displayName": "Check_Out",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Total_Price",
+              "displayName": "Total_Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Payment_Status",
+              "displayName": "Payment_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Booking_Status",
+              "displayName": "Booking_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendar_Event_ID",
+              "displayName": "Calendar_Event_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Booking_Date",
+              "displayName": "Booking_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Last_Updated",
+              "displayName": "Last_Updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -416,
+        240
+      ],
+      "id": "2cf26781-0ef2-4580-991e-2af41589068d",
+      "name": "Cancel Room Booking Record"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Retrieve spa booking records to check appointment availability, locate existing spa reservations using the Booking_ID or guest email, and retrieve the latest Booking_ID when creating a new spa booking.",
+        "documentId": {
+          "__rl": true,
+          "value": "1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo",
+          "mode": "list",
+          "cachedResultName": "Aurora_Grand_Hotel_Booking_System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1158730704,
+          "mode": "list",
+          "cachedResultName": "Spa_Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit#gid=1158730704"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -864,
+        608
+      ],
+      "id": "d1c3eaeb-6207-46ff-bdb8-6d45804d0bfc",
+      "name": "Get Spa Booking Record"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create a new spa appointment booking after the reservation has been successfully confirmed.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo",
+          "mode": "list",
+          "cachedResultName": "Aurora_Grand_Hotel_Booking_System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1158730704,
+          "mode": "list",
+          "cachedResultName": "Spa_Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit#gid=1158730704"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Booking_ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Booking_ID', ``, 'string') }}",
+            "Guest_Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Guest_Name', ``, 'string') }}",
+            "Email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Email', ``, 'string') }}",
+            "Service": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Service', ``, 'string') }}",
+            "Therapist": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Therapist', ``, 'string') }}",
+            "Appointment_Date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Appointment_Date', ``, 'string') }}",
+            "Appointment_Time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Appointment_Time', ``, 'string') }}",
+            "Duration": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Duration', ``, 'string') }}",
+            "Price": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Price', ``, 'string') }}",
+            "Payment_Status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Payment_Status', ``, 'string') }}",
+            "Booking_Status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Booking_Status', ``, 'string') }}",
+            "Calendar_Event_ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Calendar_Event_ID', ``, 'string') }}",
+            "Booking_Date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Booking_Date', ``, 'string') }}",
+            "Last_Updated": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Last_Updated', ``, 'string') }}",
+            "Notes": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Notes', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Booking_ID",
+              "displayName": "Booking_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Guest_Name",
+              "displayName": "Guest_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Therapist",
+              "displayName": "Therapist",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Appointment_Date",
+              "displayName": "Appointment_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Appointment_Time",
+              "displayName": "Appointment_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Duration",
+              "displayName": "Duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Price",
+              "displayName": "Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Payment_Status",
+              "displayName": "Payment_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Booking_Status",
+              "displayName": "Booking_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendar_Event_ID",
+              "displayName": "Calendar_Event_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Booking_Date",
+              "displayName": "Booking_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last_Updated",
+              "displayName": "Last_Updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -704,
+        608
+      ],
+      "id": "e9c08829-54ac-4287-b513-91ff74f88e8d",
+      "name": "Create Spa Booking Record"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Update an existing spa appointment with the latest booking details after a successful modification.",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo",
+          "mode": "list",
+          "cachedResultName": "Aurora_Grand_Hotel_Booking_System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1158730704,
+          "mode": "list",
+          "cachedResultName": "Spa_Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit#gid=1158730704"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Booking_ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Booking_ID__using_to_match_', ``, 'string') }}",
+            "Service": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Service', ``, 'string') }}",
+            "Therapist": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Therapist', ``, 'string') }}",
+            "Appointment_Date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Appointment_Date', ``, 'string') }}",
+            "Price": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Price', ``, 'string') }}",
+            "Booking_Status": "Modified"
+          },
+          "matchingColumns": [
+            "Booking_ID"
+          ],
+          "schema": [
+            {
+              "id": "Booking_ID",
+              "displayName": "Booking_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Guest_Name",
+              "displayName": "Guest_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Therapist",
+              "displayName": "Therapist",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Appointment_Date",
+              "displayName": "Appointment_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Appointment_Time",
+              "displayName": "Appointment_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Duration",
+              "displayName": "Duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Price",
+              "displayName": "Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Payment_Status",
+              "displayName": "Payment_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Booking_Status",
+              "displayName": "Booking_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendar_Event_ID",
+              "displayName": "Calendar_Event_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Booking_Date",
+              "displayName": "Booking_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Last_Updated",
+              "displayName": "Last_Updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -528,
+        608
+      ],
+      "id": "2b257b38-9166-4bad-bd3f-97105fcd9020",
+      "name": "Update Spa Booking Record"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Update an existing spa appointment by changing its booking status to Cancelled after a successful cancellation.",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo",
+          "mode": "list",
+          "cachedResultName": "Aurora_Grand_Hotel_Booking_System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1158730704,
+          "mode": "list",
+          "cachedResultName": "Spa_Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit#gid=1158730704"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Booking_ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Booking_ID__using_to_match_', ``, 'string') }}",
+            "Booking_Status": "Cancelled"
+          },
+          "matchingColumns": [
+            "Booking_ID"
+          ],
+          "schema": [
+            {
+              "id": "Booking_ID",
+              "displayName": "Booking_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Guest_Name",
+              "displayName": "Guest_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Therapist",
+              "displayName": "Therapist",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Appointment_Date",
+              "displayName": "Appointment_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Appointment_Time",
+              "displayName": "Appointment_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Duration",
+              "displayName": "Duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Price",
+              "displayName": "Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Payment_Status",
+              "displayName": "Payment_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Booking_Status",
+              "displayName": "Booking_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendar_Event_ID",
+              "displayName": "Calendar_Event_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Booking_Date",
+              "displayName": "Booking_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Last_Updated",
+              "displayName": "Last_Updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -352,
+        608
+      ],
+      "id": "2535b99c-10bf-4385-b0ec-284d02164d02",
+      "name": "Cancel Spa Booking Record"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Retrieve event hall booking records to check availability, locate existing event hall reservations using the Booking_ID or guest email, and retrieve the latest Booking_ID when creating a new event hall booking.",
+        "documentId": {
+          "__rl": true,
+          "value": "1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo",
+          "mode": "list",
+          "cachedResultName": "Aurora_Grand_Hotel_Booking_System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 448349171,
+          "mode": "list",
+          "cachedResultName": "EventHall_Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit#gid=448349171"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -832,
+        976
+      ],
+      "id": "886bfeb9-83f5-4488-a081-28b2082b02db",
+      "name": "Get Event Hall Booking Record"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create a new event hall booking record after the reservation has been successfully confirmed.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo",
+          "mode": "list",
+          "cachedResultName": "Aurora_Grand_Hotel_Booking_System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 448349171,
+          "mode": "list",
+          "cachedResultName": "EventHall_Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit#gid=448349171"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Booking_ID",
+              "displayName": "Booking_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Guest_Name",
+              "displayName": "Guest_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hall_Name",
+              "displayName": "Hall_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Event_Type",
+              "displayName": "Event_Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Event_Date",
+              "displayName": "Event_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Start_Time",
+              "displayName": "Start_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "End_Time",
+              "displayName": "End_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Guest_Count",
+              "displayName": "Guest_Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Catering",
+              "displayName": "Catering",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Equipment",
+              "displayName": "Equipment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total_Price",
+              "displayName": "Total_Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Payment_Status",
+              "displayName": "Payment_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Booking_Status",
+              "displayName": "Booking_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendar_Event_ID",
+              "displayName": "Calendar_Event_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Booking_Date",
+              "displayName": "Booking_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last_Updated",
+              "displayName": "Last_Updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -672,
+        976
+      ],
+      "id": "8eb42306-0042-4f60-a97d-24c1ba131378",
+      "name": "Create Event Hall Booking Record"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Update an existing event hall reservation with the latest booking details after a successful modification.",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo",
+          "mode": "list",
+          "cachedResultName": "Aurora_Grand_Hotel_Booking_System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 448349171,
+          "mode": "list",
+          "cachedResultName": "EventHall_Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit#gid=448349171"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Booking_ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Booking_ID__using_to_match_', ``, 'string') }}",
+            "Hall_Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Hall_Name', ``, 'string') }}",
+            "Event_Type": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_Type', ``, 'string') }}",
+            "Event_Date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_Date', ``, 'string') }}",
+            "Start_Time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Time', ``, 'string') }}",
+            "End_Time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End_Time', ``, 'string') }}",
+            "Guest_Count": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Guest_Count', ``, 'string') }}",
+            "Catering": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Catering', ``, 'string') }}",
+            "Equipment": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Equipment', ``, 'string') }}",
+            "Total_Price": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Total_Price', ``, 'string') }}",
+            "Booking_Status": "Modified"
+          },
+          "matchingColumns": [
+            "Booking_ID"
+          ],
+          "schema": [
+            {
+              "id": "Booking_ID",
+              "displayName": "Booking_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Guest_Name",
+              "displayName": "Guest_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Hall_Name",
+              "displayName": "Hall_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Event_Type",
+              "displayName": "Event_Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Event_Date",
+              "displayName": "Event_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Start_Time",
+              "displayName": "Start_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "End_Time",
+              "displayName": "End_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Guest_Count",
+              "displayName": "Guest_Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Catering",
+              "displayName": "Catering",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Equipment",
+              "displayName": "Equipment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total_Price",
+              "displayName": "Total_Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Payment_Status",
+              "displayName": "Payment_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Booking_Status",
+              "displayName": "Booking_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendar_Event_ID",
+              "displayName": "Calendar_Event_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Booking_Date",
+              "displayName": "Booking_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Last_Updated",
+              "displayName": "Last_Updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -496,
+        976
+      ],
+      "id": "e3abbf67-2a80-4545-bc33-1312a5a74131",
+      "name": "Update Event Hall Booking Record"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Update an existing event hall reservation by changing its booking status to Cancelled after a successful cancellation.",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo",
+          "mode": "list",
+          "cachedResultName": "Aurora_Grand_Hotel_Booking_System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 448349171,
+          "mode": "list",
+          "cachedResultName": "EventHall_Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nt8hd8RhY30BLl2ZtnnYQa70dwZwPg6wO82iu74zujo/edit#gid=448349171"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Booking_ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Booking_ID__using_to_match_', ``, 'string') }}",
+            "Booking_Status": "Cancelled"
+          },
+          "matchingColumns": [
+            "Booking_ID"
+          ],
+          "schema": [
+            {
+              "id": "Booking_ID",
+              "displayName": "Booking_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Guest_Name",
+              "displayName": "Guest_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Hall_Name",
+              "displayName": "Hall_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Event_Type",
+              "displayName": "Event_Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Event_Date",
+              "displayName": "Event_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Start_Time",
+              "displayName": "Start_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "End_Time",
+              "displayName": "End_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Guest_Count",
+              "displayName": "Guest_Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Catering",
+              "displayName": "Catering",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Equipment",
+              "displayName": "Equipment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Total_Price",
+              "displayName": "Total_Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Payment_Status",
+              "displayName": "Payment_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Booking_Status",
+              "displayName": "Booking_Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendar_Event_ID",
+              "displayName": "Calendar_Event_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Booking_Date",
+              "displayName": "Booking_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Last_Updated",
+              "displayName": "Last_Updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -320,
+        976
+      ],
+      "id": "f3f0e0c3-fda8-4ee4-a4aa-a4b2a518362a",
+      "name": "Cancel Event Hall Booking Record"
+    },
+    {
+      "parameters": {
+        "description": "Generate the next unique Room Booking ID based on the highest existing Booking_ID returned from the Get Room Booking Record tool.\n\nRules:\n- Booking IDs use the format RB-000001.\n- Find the highest existing Room Booking ID.\n- Increase the numeric part by 1.\n- Preserve six digits with leading zeros.\n- If no booking exists, return RB-000001.\n- Return only the generated Booking_ID.",
+        "jsCode": "const bookings = $input.all();\n\nlet highest = 0;\n\nfor (const item of bookings) {\n  const id = item.json?.Booking_ID;\n\n  if (!id) continue;\n\n  const match = id.match(/^RB-(\\d+)$/);\n\n  if (match) {\n    const number = parseInt(match[1], 10);\n\n    if (number > highest) {\n      highest = number;\n    }\n  }\n}\n\nconst nextNumber = highest + 1;\n\nconst bookingId = `RB-${String(nextNumber).padStart(6, '0')}`;\n\nreturn bookingId;"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        -1552,
+        240
+      ],
+      "id": "efdda7d5-869d-492b-a524-75fcbd7e5ab9",
+      "name": "Generate Room Booking ID"
+    },
+    {
+      "parameters": {
+        "description": "Generate the next unique Spa Booking ID based on the highest existing Booking_ID returned from the Get Spa Booking Record tool.\n\nRules:\n- Booking IDs use the format SP-000001.\n- Find the highest existing Spa Booking ID.\n- Increase the numeric part by 1.\n- Preserve six digits with leading zeros.\n- If no booking exists, return SP-000001.\n- Return only the generated Booking_ID.",
+        "jsCode": "const bookings = $input.all();\n\nlet highest = 0;\n\nfor (const item of bookings) {\n  const id = item.json?.Booking_ID;\n\n  if (!id) continue;\n\n  const match = id.match(/^SB-(\\d+)$/);\n\n  if (match) {\n    const number = parseInt(match[1], 10);\n\n    if (number > highest) {\n      highest = number;\n    }\n  }\n}\n\nconst nextNumber = highest + 1;\n\nconst bookingId = `SB-${String(nextNumber).padStart(6, '0')}`;\n\nreturn bookingId;"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        -1536,
+        608
+      ],
+      "id": "7ca9c7d7-b4f0-4f7a-a167-796a2d131c0c",
+      "name": "Generate Spa Booking ID"
+    },
+    {
+      "parameters": {
+        "description": "Generate the next unique Event Hall Booking ID based on the highest existing Booking_ID returned from the Get Event Hall Booking Record tool.\n\nRules:\n- Booking IDs use the format EH-000001.\n- Find the highest existing Event Hall Booking ID.\n- Increase the numeric part by 1.\n- Preserve six digits with leading zeros.\n- If no booking exists, return EH-000001.\n- Return only the generated Booking_ID.",
+        "jsCode": "const bookings = $input.all();\n\nlet highest = 0;\n\nfor (const item of bookings) {\n  const id = item.json?.Booking_ID;\n\n  if (!id) continue;\n\n  const match = id.match(/^EH-(\\d+)$/);\n\n  if (match) {\n    const number = parseInt(match[1], 10);\n\n    if (number > highest) {\n      highest = number;\n    }\n  }\n}\n\nconst nextNumber = highest + 1;\n\nconst bookingId = `EH-${String(nextNumber).padStart(6, '0')}`;\n\nreturn bookingId;"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        -1536,
+        976
+      ],
+      "id": "a71a594c-7d26-45a6-9bcb-1122042867cb",
+      "name": "Generate Event Hall Booking ID"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Room Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Spa Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Event Hall Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Room Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_room_booking_calendar_event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Room Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_room_booking_calendar_event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Room Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "delete_room_booking_calendar_event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Room Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send_booking_confirmation_email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Room Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Spa Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_spa_booking_calendar_event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Spa Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_spa_booking_calendar_event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Spa Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "delete_spa_booking_calendar_event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Spa Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send_booking_confirmation_email1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Spa Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Event Hall Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_event_hall_booking_calendar_event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Event Hall Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_event_hall_booking_calendar_event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Event Hall Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "delete_event_hall_booking_calendar_event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Event Hall Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send_booking_confirmation_email2": {
+      "ai_tool": [
+        [
+          {
+            "node": "Event Hall Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Room Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Spa Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event Hall Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Room Booking Record": {
+      "ai_tool": [
+        [
+          {
+            "node": "Room Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Room Booking Record": {
+      "ai_tool": [
+        [
+          {
+            "node": "Room Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Room Booking Record": {
+      "ai_tool": [
+        [
+          {
+            "node": "Room Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancel Room Booking Record": {
+      "ai_tool": [
+        [
+          {
+            "node": "Room Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Spa Booking Record": {
+      "ai_tool": [
+        [
+          {
+            "node": "Spa Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Spa Booking Record": {
+      "ai_tool": [
+        [
+          {
+            "node": "Spa Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Spa Booking Record": {
+      "ai_tool": [
+        [
+          {
+            "node": "Spa Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancel Spa Booking Record": {
+      "ai_tool": [
+        [
+          {
+            "node": "Spa Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Event Hall Booking Record": {
+      "ai_tool": [
+        [
+          {
+            "node": "Event Hall Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Event Hall Booking Record": {
+      "ai_tool": [
+        [
+          {
+            "node": "Event Hall Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Event Hall Booking Record": {
+      "ai_tool": [
+        [
+          {
+            "node": "Event Hall Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancel Event Hall Booking Record": {
+      "ai_tool": [
+        [
+          {
+            "node": "Event Hall Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Room Booking ID": {
+      "ai_tool": [
+        [
+          {
+            "node": "Room Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Spa Booking ID": {
+      "ai_tool": [
+        [
+          {
+            "node": "Spa Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Event Hall Booking ID": {
+      "ai_tool": [
+        [
+          {
+            "node": "Event Hall Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "a29363da-a848-4c8f-91ab-df5a169ce7e7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "10d1afd609a10560972f9cce045efea209909b9336aaf69f095422651f98f6de"
+  },
+  "nodeGroups": [],
+  "id": "Cbz9J3dDmQGMn3bE",
+  "tags": []
+}
