@@ -1,0 +1,438 @@
+{
+  "name": "Sending Follow up And Remainders to Client",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        320
+      ],
+      "id": "b02082bc-5eaf-46f5-891e-1f7453840fd9",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1IxdJ7bUwRAAUIyBJ_qkq9_4KOOEFOIfrw-h06UFud3A",
+          "mode": "list",
+          "cachedResultName": "Data for Cold Email",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IxdJ7bUwRAAUIyBJ_qkq9_4KOOEFOIfrw-h06UFud3A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IxdJ7bUwRAAUIyBJ_qkq9_4KOOEFOIfrw-h06UFud3A/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -880,
+        320
+      ],
+      "id": "1e5751ae-ae11-4829-8fb8-339c9148c981",
+      "name": "Get row(s) in sheet"
+    },
+    {
+      "parameters": {
+        "batchSize": 2,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -672,
+        320
+      ],
+      "id": "de6ec262-eb11-45e0-9151-2a8d554c8d49",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7c7278d3-1d82-4996-8b5a-a4489fe8db95",
+              "leftValue": "={{ $json.Email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "bec447a1-4792-4f5c-bb24-4021688dc097",
+              "leftValue": "={{ $('Get row(s) in sheet').item.json['First Name'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -480,
+        480
+      ],
+      "id": "f556ff08-55b0-4f77-833a-6f635b2b2658",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a professional client outreach assistant working on behalf of S.Solution Lab.\n\nYOUR ROLE:\nYou handle three types of outbound client communication:\n1. Reminders — follow-up messages about pending actions, appointments, renewals, or previous offers.\n2. Product Announcements — informing clients about new products or services.\n3. Marketing Messages — promoting existing products/services to encourage engagement or purchase.\n\nCORE RULES (MUST FOLLOW):\n\n1. PERSONALIZATION:\n   - Always extract the client's first name from the \"First Name\" field in the input data.\n   - Always address the client by their first name at the start of the message (e.g., \"Hi Ahmed,\" or \"Assalam-o-Alaikum Sara,\").\n   - Never use a generic greeting like \"Dear Customer\" if a first name is available.\n\n2. MESSAGE TYPE HANDLING:\n   - Determine the message type from the input data field (e.g., \"message_type\": \"reminder\" / \"new_product\" / \"marketing\").\n   - REMINDER: Politely remind the client about the pending item. Keep it short, clear, and action-oriented.\n   - NEW PRODUCT: Introduce the new product/service in 2-3 sentences, highlighting the key benefit. Include a soft call-to-action.\n   - MARKETING: Write a persuasive but non-pushy message. Focus on value/benefit. End with a clear call-to-action.\n\n3. TONE:\n   - Professional, warm, and concise. No more than 120 words per message.\n   - Avoid overly salesy or spammy language.\n\n4. OUTPUT FORMAT:\n   Always return the result in this exact JSON structure:\n   {\n     \"Email\": \"<client's email — used to match and identify the correct row in the sheet>\",\n     \"First Name\": \"<client's first name>\",\n     \"email_subject\": \"<short relevant subject line>\",\n     \"email_body\": \"<the personalized message>\",\n     \"message_type\": \"<reminder/new_product/marketing>\",\n     \"Email Status\": \"Done\"\n   }\n\n5. GOOGLE SHEET ROW UPDATE LOGIC:\n   - The Google Sheet has columns: First Name, Last Name, Email, Email Status.\n   - \"Email\" is the unique identifier used to find and match the correct row.\n   - Once the email is generated and ready to send, set \"Email Status\": \"Done\" — this value updates ONLY the \"Email Status\" column of that matched row. Do not alter First Name, Last Name, or Email values.\n   - If the message cannot be generated due to missing/invalid data, set \"Email Status\": \"Failed\" and add a \"notes\" field explaining why.\n   - Never leave \"Email Status\" empty or unset.\n\n6. DO NOT:\n   - Do not send duplicate reminders in the same message.\n   - Do not fabricate product details not provided in the input.\n   - Do not include placeholder text like \"[Product Name]\" — if data is missing, set \"Email Status\" to \"Failed\" instead.\n\nWait for the input data (First Name, Email, message_type, product/reminder details) before generating a response.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "72408c58-129f-4689-a0aa-91fb5cb6f6d0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        304
+      ],
+      "id": "ce1ae130-94ec-4927-9be4-23ec3c98cb2b",
+      "name": "Send a message in Gmail",
+      "webhookId": "e4a0434d-193d-4fca-84f1-803f5beddf8a"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1IxdJ7bUwRAAUIyBJ_qkq9_4KOOEFOIfrw-h06UFud3A",
+          "mode": "list",
+          "cachedResultName": "Data for Cold Email",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IxdJ7bUwRAAUIyBJ_qkq9_4KOOEFOIfrw-h06UFud3A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IxdJ7bUwRAAUIyBJ_qkq9_4KOOEFOIfrw-h06UFud3A/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $json.Email }}",
+            "Email Status": "Done"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email Status",
+              "displayName": "Email Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        304
+      ],
+      "id": "e1d35eb2-6274-4e13-9220-92aee64abba5",
+      "name": "Update row in sheet in Google Sheets"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1IxdJ7bUwRAAUIyBJ_qkq9_4KOOEFOIfrw-h06UFud3A",
+          "mode": "list",
+          "cachedResultName": "Data for Cold Email",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IxdJ7bUwRAAUIyBJ_qkq9_4KOOEFOIfrw-h06UFud3A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IxdJ7bUwRAAUIyBJ_qkq9_4KOOEFOIfrw-h06UFud3A/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Get row(s) in sheet').item.json.Email }}",
+            "Email Status": "Not Valid credentials"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email Status",
+              "displayName": "Email Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -272,
+        576
+      ],
+      "id": "2fccaf9c-1b93-4223-b80d-b37dff2f1929",
+      "name": "Update row in sheet"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAlibabaCloud",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        208
+      ],
+      "id": "62fe9ec3-6ee5-4268-b00a-25f5f868e343",
+      "name": "Qwen Cloud Chat Model",
+      "credentials": {
+        "alibabaCloudApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qwen Cloud Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "7b7fede8-ea86-4646-a05d-68c526e332e5",
+  "meta": {
+    "instanceId": "10d1afd609a10560972f9cce045efea209909b9336aaf69f095422651f98f6de"
+  },
+  "nodeGroups": [],
+  "id": "YdArUhVazphl2QAo",
+  "tags": []
+}
