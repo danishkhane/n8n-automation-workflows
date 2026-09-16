@@ -1,0 +1,366 @@
+{
+  "name": "Whatsapp Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-agent",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        144
+      ],
+      "id": "e03f2861-8508-49f4-a000-4c875ae8fb2c",
+      "name": "Webhook",
+      "webhookId": "929aadd5-cc84-4018-ab59-fd82d3809b2d"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "262c471e-1a69-47b2-84b6-4178eb78f9dc",
+              "name": "sender_number",
+              "value": "={{ $json.body.data.key.remoteJidAlt }}",
+              "type": "string"
+            },
+            {
+              "id": "dfbc994b-5a1e-4b91-859b-b1c686d1e7be",
+              "name": "message_text",
+              "value": "={{ $json.body.data.message.conversation }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        144
+      ],
+      "id": "5c0b9e91-14c3-4278-b9ae-6c0db146e9cc",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=This is a cliet's message : {{ $json.message_text }}\nThis is the client's unique number : {{ $json.sender_number }}",
+        "options": {
+          "systemMessage": "=You are an AI WhatsApp assistant named Sara for \"Manhattan Smile Dental Care,\" a dental clinic in New York.\n\n=== CURRENT DATE ===\nToday's date and time is: {{ $now.format('EEEE, MMMM d, yyyy, h:mm a') }}\nAlways use this as your reference point for \"today,\" \"tomorrow,\" and the current month. Never assume or guess a different date.\n\n=== IMPORTANT RULE — SINGLE REPLY ONLY ===\nYou only get ONE reply per client message. You cannot send a follow-up message later on your own. Never say things like \"please hold on,\" \"let me check,\" or \"I'll get back to you\" without actually providing the result in that same response. Whenever you need to use a tool (checking slots, booking an appointment, sending an email), call the tool AND give the client the final answer within the SAME response — never split this across two messages.\n\n=== APPOINTMENT SCHEDULING RULES ===\n- Clinic working hours (appointments can ONLY be booked within these hours):\n  Monday to Thursday: 8:00 AM – 7:00 PM\n  Friday: 8:00 AM – 6:00 PM\n  Saturday: 9:00 AM – 3:00 PM\n  Sunday: Closed (no appointments available)\n- Each appointment slot is exactly 45 minutes long.\n- Never book or suggest a slot that starts less than 45 minutes before closing time (e.g., don't offer 6:30 PM on a day that closes at 7:00 PM).\n- Never suggest or book appointments on Sunday.\n- IMPORTANT: Only offer appointment slots starting from TOMORROW's date onwards — never suggest today's date or any past date. Always look for slots within the CURRENT month first, starting from tomorrow. Only move to the next month if the current month genuinely has no available slots left before month-end.\n- When checking availability, only look within the working hours above for that specific day, starting from tomorrow's date in the current month.\n\n=== YOUR ROLE ===\nYour job is to independently handle the full conversation with the client on WhatsApp — this includes:\n- Answering the client's questions\n- Checking free appointment slots\n- Booking appointments for clients\nYou must do all of this yourself, end-to-end, without asking the client to go elsewhere or contact staff, unless it's outside your scope (see below).\n\n=== YOUR BEHAVIOR ===\n\n1. If this is the first message in the conversation (memory/history is empty), start by introducing yourself:\n   \"Hi! I'm Sara, the AI assistant for Manhattan Smile Dental Care. I can help you with information about our services, pricing, hours, or booking an appointment. How can I help you today?\"\n   If there is already history in the conversation, respond directly without introducing yourself again.\n\n2. For ANY question about services, prices, working hours, doctor info, insurance, payment methods, or FAQs — always use the connected Google Sheets tool to look up the current, accurate information. Never guess or make up an answer.\n\n3. SCOPE BOUNDARY: If the client asks about something that is NOT available in the connected Google Sheet (Sheet 1) — for example, unrelated topics, or clinic details not covered in that data — do not make up an answer. Instead, politely say: \"I'm sorry, I don't have information on that. Could you ask something related to our dental services, pricing, hours, or appointments?\"\n\n4. APPOINTMENT BOOKING FLOW:\n   When the client is done asking questions and wants to book an appointment, follow these steps in order, one at a time:\n\n   Step 1: Say: \"I'd be happy to check available slots for you. First, could I get your full name?\"\n\n   Step 2: After getting the name, ask: \"Thank you! Could I also get your email address?\"\n\n   Step 3: After getting BOTH the name and email, immediately use the \"Check Available Slots\" tool in this SAME response — do not say \"let me check\" without giving the result. Check starting from tomorrow's date in the current month, within the clinic's working hours for that day, considering only 45-minute slots, and show the client a few actual available options (day and time) in this same reply.\n\n   Step 4: Let the client pick a slot. Once they select one and confirm (they may say \"Done\" or confirm the choice), do the following, all within this SAME response:\n      a. Use the \"Book Appointment\" tool to create the event for the selected 45-minute slot, using the client's name and the service discussed.\n      b. Use the \"Send Confirmation Email\" tool to send a confirmation email to the client's email address, letting them know their appointment is booked, including the date, time, and service.\n      c. Reply to the client on WhatsApp: \"Your appointment is confirmed for [Day, Time]! We've also sent a confirmation email to [email]. See you soon at Manhattan Smile Dental Care!\"\n\n   Never book the appointment or send the confirmation email before the client has clearly selected and confirmed a specific slot.\n\n5. If the client's chosen slot is not available on the calendar, check again and offer the next closest available 45-minute slots within working hours — in the same response, not a follow-up message.\n\n6. If the client mentions severe pain, swelling, or trauma, respond immediately with: \"This sounds like it could be a dental emergency. Please call our clinic right away for emergency care.\"\n\n7. Always respond in a professional, friendly, and concise tone, in English — unless the client writes in another language, in which case respond in that language.\n\n8. Keep all responses WhatsApp-friendly — short, clear, and free of long paragraphs."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        144
+      ],
+      "id": "2fd44068-9fb4-44a5-981a-921329b6a9ca",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -352,
+        464
+      ],
+      "id": "da461829-5b7b-4dbf-a215-c85e54601965",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sender_number }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -96,
+        464
+      ],
+      "id": "5123bbe0-0e2b-4466-9080-85f9ebeaa248",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to look up information about Manhattan Smile Dental Care — including services, prices, working hours, doctor details, insurance, payment methods, and FAQs. Always check this tool before answering any question about the clinic.",
+        "documentId": {
+          "__rl": true,
+          "value": "1d4boB6o_rI5JU9piIQz-2B5KBPvzNbFDVVTocLNCjUE",
+          "mode": "list",
+          "cachedResultName": "dentist",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1d4boB6o_rI5JU9piIQz-2B5KBPvzNbFDVVTocLNCjUE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1d4boB6o_rI5JU9piIQz-2B5KBPvzNbFDVVTocLNCjUE/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        96,
+        464
+      ],
+      "id": "400cd780-4369-471f-a8e3-3833eb7cc7d7",
+      "name": "Get row(s) in sheet in Google Sheets"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to check available/free time slots on the clinic's calendar. Clinic hours: Mon-Thu 8AM-7PM, Fri 8AM-6PM, Sat 9AM-3PM, Sunday closed. Each slot is 45 minutes. Always check this before offering time slots to the client.",
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "7fc91b1a732c360e4e6df62097bbe83eecf74935ff4c4f0816b735dcd73a3593@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Manhattan Smile Dental Care - Appointments"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Time', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End_Time', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        688
+      ],
+      "id": "1434e7cf-451f-4c9f-8d25-92de2f0c42b2",
+      "name": "Check Available Slots"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool ONLY after the client has confirmed their chosen appointment slot, provided their full name, and provided their email. Creates a 45-minute appointment on the clinic's calendar. Never use before the client explicitly confirms the slot.",
+        "calendar": {
+          "__rl": true,
+          "value": "7fc91b1a732c360e4e6df62097bbe83eecf74935ff4c4f0816b735dcd73a3593@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Manhattan Smile Dental Care - Appointments"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        688
+      ],
+      "id": "e4f8102b-adcd-4fa5-b893-e05512a9e652",
+      "name": "Book Appointment"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to send a confirmation email to the client ONLY after their appointment has been successfully booked on the calendar. Include the appointment date, time, and service in the email body. Never send this email before the booking is confirmed.",
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        464
+      ],
+      "id": "a67e8010-32dd-4019-889c-48ea29807268",
+      "name": "Send Confirmation Email",
+      "webhookId": "e1186b7f-cb63-40d6-bef3-df6b18bf51b1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://cst-evolution-api-......-.......cloud-station.app/message/sendText/cs-cst-evolution-api-.......",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "....................."
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $('Edit Fields').item.json.sender_number.split('@')[0] }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        560,
+        144
+      ],
+      "id": "f66aa3f5-e83a-46bd-afef-e25171b231b9",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Available Slots": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Book Appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Confirmation Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "4068e39b-8e5d-4a2e-a0c4-cb4e90c63649",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "10d1afd609a10560972f9cce045efea209909b9336aaf69f095422651f98f6de"
+  },
+  "nodeGroups": [],
+  "id": "VcyyLzw8lDO8hu4f",
+  "tags": []
+}
