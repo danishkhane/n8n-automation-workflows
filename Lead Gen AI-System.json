@@ -1,0 +1,445 @@
+{
+  "name": "Lead Gen AI-System",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1hxBSv2gXkSSvV6LkymvU67kY5Z9gKQQD7EG8t_hMlx0",
+          "mode": "list",
+          "cachedResultName": "Lead Gen System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hxBSv2gXkSSvV6LkymvU67kY5Z9gKQQD7EG8t_hMlx0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hxBSv2gXkSSvV6LkymvU67kY5Z9gKQQD7EG8t_hMlx0/edit#gid=0"
+        },
+        "event": "rowUpdate",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2496,
+        -112
+      ],
+      "id": "acd04a58-d7ac-41a6-9faa-6da9218967f7",
+      "name": "Google Sheets Trigger"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2c49d2e1-e34d-4cde-97c9-dbc6ead8ee6e",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "Run",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "bb805caa-22f4-4052-ad51-2543db72268a",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "run",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -2256,
+        -320
+      ],
+      "id": "b976cdbf-0ee6-4698-88d0-451fad278a2c",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "operation": "Run actor and get dataset",
+        "actorId": {
+          "__rl": true,
+          "value": "nwua9Gu5YrADL7ZDj",
+          "mode": "list",
+          "cachedResultName": "Google Maps Scraper (compass/crawler-google-places)",
+          "cachedResultUrl": "https://console.apify.com/actors/nwua9Gu5YrADL7ZDj/input"
+        },
+        "customBody": "={\n    \"enableCompetitorAnalysis\": false,\n    \"includeWebResults\": false,\n    \"language\": \"en\",\n    \"locationQuery\": \"{{ $json.Location }}\",\n    \"maxCompetitorsToAnalyze\": 30,\n    \"maxCrawledPlacesPerSearch\": {{ $json.Number }},\n    \"maximumLeadsEnrichmentRecords\": 0,\n    \"scrapeContacts\": false,\n    \"scrapeDirectories\": false,\n    \"scrapeImageAuthors\": false,\n    \"scrapeOrderOnline\": false,\n    \"scrapePlaceDetailPage\": false,\n    \"scrapeReviewsPersonalData\": true,\n    \"scrapeSocialMediaProfiles\": {\n        \"facebooks\": false,\n        \"instagrams\": false,\n        \"tiktoks\": false,\n        \"twitters\": false,\n        \"youtubes\": false\n    },\n    \"scrapeTableReservationProvider\": false,\n    \"searchStringsArray\": [\n        \"{{ $json['Company Type'] }}\"\n    ],\n    \"skipClosedPlaces\": false,\n    \"verifyLeadsEnrichmentEmails\": false\n}",
+        "authentication": "apifyOAuth2Api"
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        -2128,
+        -112
+      ],
+      "id": "c4946cd3-27f0-4df5-a6cd-47cac7af6639",
+      "name": "Run an Actor and get dataset",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3370d050-9b03-43e0-9000-9b2c11cf34bd",
+              "leftValue": "={{ $json.website }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -1920,
+        -320
+      ],
+      "id": "667f1e93-b285-4821-bb33-76b4b1dcb24b",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"domain\": {{ \n    JSON.stringify(\n      $json.website \n        ? $json.website.replace(/https?:\\/\\//, '').replace(/www\\./, '').split('/')[0] \n        : ''\n    ) \n  }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -1792,
+        -112
+      ],
+      "id": "dbee0313-a902-4e0e-8a76-97b3e458b001",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "Run actor and get dataset",
+        "actorId": {
+          "__rl": true,
+          "value": "UwSrlU3InJgbBlD2s",
+          "mode": "list",
+          "cachedResultName": "Website Email Scraper - All Contacts (thenetaji/website-email-scraper)",
+          "cachedResultUrl": "https://console.apify.com/actors/UwSrlU3InJgbBlD2s/input"
+        },
+        "customBody": "={{ $json }}",
+        "authentication": "apifyOAuth2Api"
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        -1456,
+        -112
+      ],
+      "id": "b4bdc018-86a4-41b4-9e5a-3dd2b1ab112f",
+      "name": "Run an Actor and get dataset1",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst startUrls = items.map(item => ({\n    url: 'https://' + item.json.domain\n}));\n\nreturn {\n    groupByPage: true,\n    includeContactText: true,\n    solveCloudflare: false,\n    startUrls: startUrls,\n    stayOnDomain: true,\n    useStealth: true\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1584,
+        -320
+      ],
+      "id": "af00512c-b968-4217-a1ef-8f27c51f5f75",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1hxBSv2gXkSSvV6LkymvU67kY5Z9gKQQD7EG8t_hMlx0",
+          "mode": "list",
+          "cachedResultName": "Lead Gen System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hxBSv2gXkSSvV6LkymvU67kY5Z9gKQQD7EG8t_hMlx0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1554164271,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hxBSv2gXkSSvV6LkymvU67kY5Z9gKQQD7EG8t_hMlx0/edit#gid=1554164271"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Website Url": "={{ $json.sourceUrl }}",
+            "Email": "={{ $json.emails }}",
+            "Phone": "={{ $json.phones }}",
+            "Facebook": "={{ $json.facebookUrl }}",
+            "Instagram": "={{ $json.instagramUrl }}",
+            "Tiktok": "={{ $json.tiktokUrl }}",
+            "Youtube": "={{ $json.youtubeUrl }}",
+            "Company Name": "={{ $json.companyName }}",
+            "Address": "={{ $json.addresses }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Website Url",
+              "displayName": "Website Url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Facebook",
+              "displayName": "Facebook",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Youtube",
+              "displayName": "Youtube",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tiktok",
+              "displayName": "Tiktok",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Instagram",
+              "displayName": "Instagram",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1072,
+        96
+      ],
+      "id": "5572eb29-7435-47f1-95d5-6c56f715c3cc",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "jsCode": "let domainMap = new Map();\n\n// Helper to normalize phone numbers\nfunction normalizePhone(phoneStr) {\n    if (!phoneStr) return null;\n    let clean = String(phoneStr).replace(/\\n/g, ' ').replace(/[^\\d]/g, '');\n    if (clean.length === 11 && clean.startsWith('1')) {\n        clean = clean.substring(1);\n    }\n    if (clean.length === 10) {\n        return `(${clean.substring(0,3)}) ${clean.substring(3,6)}-${clean.substring(6)}`;\n    }\n    return null;\n}\n\nlet inputItems = $input.all();\nif (!inputItems || inputItems.length === 0) {\n    return [];\n}\n\ninputItems.forEach(item => {\n    let rawData = item.json;\n    if (!rawData) return;\n\n    // 1. Safe URL & Domain extraction\n    let rawUrl = rawData.sourceUrl || rawData.url || '';\n    if (!rawUrl) return;\n\n    let cleanUrl = String(rawUrl).trim();\n    let domain = '';\n    try {\n        if (!cleanUrl.startsWith('http')) {\n            cleanUrl = 'https://' + cleanUrl;\n        }\n        let parsedUrl = new URL(cleanUrl);\n        domain = parsedUrl.hostname.replace('www.', '').toLowerCase();\n    } catch (e) {\n        domain = cleanUrl.replace(/https?:\\/\\//, '').split('/')[0].toLowerCase();\n    }\n\n    if (!domain) return;\n\n    // 2. Initialize Domain Entry with separate social fields\n    if (!domainMap.has(domain)) {\n        domainMap.set(domain, {\n            sourceUrl: `https://${domain}`,\n            companyName: '',\n            emails: new Set(),\n            phones: new Set(),\n            addresses: new Set(),\n            facebook: new Set(),\n            instagram: new Set(),\n            twitter: new Set(),\n            youtube: new Set(),\n            linkedin: new Set(),\n            tiktok: new Set()\n        });\n    }\n\n    let entry = domainMap.get(domain);\n\n    // 3. Extract Company Name safely from pageTitle\n    if (rawData.pageTitle && !entry.companyName) {\n        let titleFull = String(rawData.pageTitle).trim();\n        let cleanTitle = titleFull.split(/[:\\|\\-–]/)[0].trim();\n        entry.companyName = cleanTitle || titleFull;\n    }\n\n    // 4. Safe Email Extraction\n    let rawEmails = rawData.emails;\n    if (rawEmails) {\n        let emailList = Array.isArray(rawEmails) ? rawEmails : (typeof rawEmails === 'object' ? Object.values(rawEmails) : [String(rawEmails)]);\n        emailList.forEach(e => {\n            let emailStr = typeof e === 'object' && e !== null ? (e.url || e.email || '') : String(e);\n            emailStr = emailStr.trim().toLowerCase().replace(/,+$/, '');\n            if (emailStr && emailStr.includes('@') && emailStr !== 'empty' && !emailStr.includes('schema') && !emailStr.includes('example')) {\n                entry.emails.add(emailStr);\n            }\n        });\n    }\n\n    // 5. Safe Phone Extraction\n    let rawPhones = rawData.phones;\n    if (rawPhones) {\n        let phoneList = Array.isArray(rawPhones) ? rawPhones : (typeof rawPhones === 'object' ? Object.values(rawPhones) : [String(rawPhones)]);\n        phoneList.forEach(p => {\n            let pStr = String(p).trim();\n            if (pStr.includes('\\n')) {\n                pStr = pStr.split('\\n').pop();\n            }\n            let formattedPhone = normalizePhone(pStr);\n            if (formattedPhone) {\n                entry.phones.add(formattedPhone);\n            }\n        });\n    }\n\n    // 6. Safe Address Extraction\n    let rawAddresses = rawData.addresses;\n    if (rawAddresses) {\n        let addrList = Array.isArray(rawAddresses) ? rawAddresses : (typeof rawAddresses === 'object' ? Object.values(rawAddresses) : [String(rawAddresses)]);\n        addrList.forEach(a => {\n            let aStr = String(a).trim().replace(/\\s+/g, ' ');\n            if (aStr.includes(':') && !/^\\d{2,6}/.test(aStr)) {\n                aStr = aStr.split(':').slice(1).join(':').trim();\n            }\n            let lower = aStr.toLowerCase();\n            let hasJunk = /(appointment|doctor|when dr|i had|stars|front desk|school|drive|p\\.m|a\\.m|after|before|click|contact|post|hour|day|month|year|freeway|feet|list|diagnos|ago|seen|trip|already|example|min|americans|adults|hg|have|that|you|over|than|miles)/i.test(lower);\n            let isRealAddress = /^\\d{2,6}\\s+[A-Za-z0-9]/i.test(aStr);\n\n            if (isRealAddress && !hasJunk && aStr.length >= 8 && aStr.length < 80) {\n                let cleanAddr = aStr.toLowerCase().replace(/\\b\\w/g, c => c.toUpperCase());\n                entry.addresses.add(cleanAddr);\n            }\n        });\n    }\n\n    // 7. Categorized Socials Extraction (Platform-wise separation & cleaning)\n    let rawSocials = rawData.socials;\n    if (rawSocials && typeof rawSocials === 'object') {\n        for (let platform in rawSocials) {\n            let platformData = rawSocials[platform];\n            if (platformData) {\n                let itemsList = Array.isArray(platformData) ? platformData : Object.values(platformData);\n                itemsList.forEach(itemObj => {\n                    let socialUrl = '';\n                    if (itemObj && typeof itemObj === 'object' && itemObj.url) {\n                        socialUrl = String(itemObj.url).trim();\n                    } else if (typeof itemObj === 'string' && itemObj.startsWith('http')) {\n                        socialUrl = itemObj.trim();\n                    }\n\n                    if (socialUrl && !socialUrl.includes('/sharer') && !socialUrl.includes('intent/tweet') && !socialUrl.includes('pin/create/button')) {\n                        let lowerUrl = socialUrl.toLowerCase();\n                        if (lowerUrl.includes('facebook.com')) {\n                            entry.facebook.add(socialUrl);\n                        } else if (lowerUrl.includes('instagram.com')) {\n                            entry.instagram.add(socialUrl);\n                        } else if (lowerUrl.includes('twitter.com') || lowerUrl.includes('x.com')) {\n                            entry.twitter.add(socialUrl);\n                        } else if (lowerUrl.includes('youtube.com')) {\n                            entry.youtube.add(socialUrl);\n                        } else if (lowerUrl.includes('linkedin.com')) {\n                            entry.linkedin.add(socialUrl);\n                        } else if (lowerUrl.includes('tiktok.com')) {\n                            entry.tiktok.add(socialUrl);\n                        }\n                    }\n                });\n            }\n        }\n    }\n});\n\n// 8. Generate Output with separate columns for each social media\nlet results = [];\ndomainMap.forEach((val, domain) => {\n    results.push({\n        json: {\n            sourceUrl: val.sourceUrl,\n            companyName: val.companyName || domain,\n            emails: Array.from(val.emails).join(', '),\n            phones: Array.from(val.phones).join(', '),\n            addresses: Array.from(val.addresses).join(' | '),\n            facebookUrl: Array.from(val.facebook).join(' | '),\n            instagramUrl: Array.from(val.instagram).join(' | '),\n            twitterUrl: Array.from(val.twitter).join(' | '),\n            youtubeUrl: Array.from(val.youtube).join(' | '),\n            linkedinUrl: Array.from(val.linkedin).join(' | '),\n            tiktokUrl: Array.from(val.tiktok).join(' | ')\n        }\n    });\n});\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -976,
+        -176
+      ],
+      "id": "54254ebf-21b2-437d-922a-881927f1675f",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Run an Actor and get dataset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run an Actor and get dataset": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Run an Actor and get dataset1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run an Actor and get dataset1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "13145273-a87f-4329-adab-e6c1ebdef9c0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "10d1afd609a10560972f9cce045efea209909b9336aaf69f095422651f98f6de"
+  },
+  "nodeGroups": [],
+  "id": "ew0eSH9VhsSmLDCE",
+  "tags": []
+}
